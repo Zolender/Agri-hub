@@ -15,7 +15,9 @@ import {
     ChevronRight,
     Users,
     ScrollText,
-    UserCircle
+    UserCircle,
+    PanelLeftClose,
+    PanelLeftOpen,
 } from 'lucide-react';
 
 type Role = 'ADMIN' | 'MANAGER' | 'ANALYST';
@@ -28,15 +30,24 @@ type NavItem = {
 };
 
 type NavGroup = {
-    label: string;           // section header e.g. "Admin"
-    minRole: Role;           // hide entire group if role doesn't qualify
+    label: string;
+    minRole: Role;
     items: NavItem[];
 };
 
-export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Role }) {
+export default function SidebarNav({
+    isDark,
+    role,
+    isCollapsed,
+    onToggle,
+}: {
+    isDark: boolean;
+    role: Role;
+    isCollapsed: boolean;
+    onToggle: () => void;
+}) {
     const pathname = usePathname();
 
-    // ── Helper — does this role meet the minimum? ──────────────────────────────
     const hasAccess = (minRole: Role) => {
         if (minRole === 'ANALYST') return true;
         if (minRole === 'MANAGER') return role === 'ADMIN' || role === 'MANAGER';
@@ -44,7 +55,6 @@ export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Ro
         return false;
     };
 
-    // ── Main nav items (no grouping) ───────────────────────────────────────────
     const mainItems: NavItem[] = [
         { name: 'Dashboard',     href: '/dashboard',      icon: LayoutDashboard, minRole: 'ANALYST' },
         { name: 'Transactions',  href: '/transactions',   icon: History,         minRole: 'ANALYST' },
@@ -53,13 +63,12 @@ export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Ro
         { name: 'Import Data',   href: '/import',         icon: FileUp,          minRole: 'MANAGER' },
     ];
 
-    
     const adminGroup: NavGroup = {
         label: 'Admin',
-        minRole: 'MANAGER', // show the section header to MANAGER too (they see Users)
+        minRole: 'MANAGER',
         items: [
-            { name: 'Users',     href: '/admin', icon: Users,      minRole: 'ADMIN'   },
-            { name: 'Audit Log', href: '/admin/audit', icon: ScrollText, minRole: 'ADMIN'   },
+            { name: 'Users',     href: '/admin',       icon: Users,      minRole: 'ADMIN' },
+            { name: 'Audit Log', href: '/admin/audit', icon: ScrollText, minRole: 'ADMIN' },
         ],
     };
 
@@ -67,43 +76,50 @@ export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Ro
     const showAdminGroup    = hasAccess(adminGroup.minRole);
     const visibleAdminItems = adminGroup.items.filter(item => hasAccess(item.minRole));
 
+    // All registered hrefs — prevents a parent prefix from staying active
+    // when a more-specific child owns the current path
+    const allNavHrefs = [
+        ...mainItems.map(i => i.href),
+        ...adminGroup.items.map(i => i.href),
+        '/profile',
+    ];
 
     const isActiveLink = (href: string) => {
-        if (href === "/") return pathname === "/";
-
-        // Exact match always counts
         if (pathname === href) return true;
-
-        // If href is '/admin', do NOT treat it as a section root
-        if (href === "/admin") return false;
-
-        // For everything else, treat as section root
-        return pathname.startsWith(href + "/");
+        if (allNavHrefs.some(h => h !== href && pathname === h)) return false;
+        return pathname.startsWith(href + '/');
     };
 
-    // ── Shared link renderer ───────────────────────────────────────────────────
+    // ── Shared class helpers ───────────────────────────────────────────────────
+    const iconBtn = (isActive: boolean) => `
+        relative flex items-center overflow-hidden rounded-xl
+        transition-colors duration-200
+        ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full gap-3 px-4 py-3'}
+        ${isActive
+            ? 'bg-linear-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/20'
+            : isDark
+            ? 'text-stone-400 hover:bg-stone-800 hover:text-stone-100'
+            : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+        }
+    `;
+
     const renderNavLink = (item: NavItem, index: number) => {
         const Icon = item.icon;
         const isActive = isActiveLink(item.href);
+
         return (
             <motion.div
                 key={item.href}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05, duration: 0.3 }}
+                className={isCollapsed ? '' : 'w-full'}
             >
                 <Link
                     href={item.href}
-                    className={`
-                        relative flex items-center justify-between gap-3 px-4 py-3 rounded-xl
-                        transition-all duration-300 group overflow-hidden
-                        ${isActive
-                            ? 'bg-linear-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/20'
-                            : isDark
-                            ? 'text-stone-400 hover:bg-stone-800 hover:text-stone-100'
-                            : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
-                        }
-                    `}
+                    aria-label={item.name}
+                    title={isCollapsed ? item.name : undefined}
+                    className={iconBtn(isActive)}
                 >
                     {isActive && (
                         <motion.div
@@ -112,12 +128,16 @@ export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Ro
                             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                         />
                     )}
-                    <div className="flex items-center gap-3 relative z-10">
-                        <Icon className="w-5 h-5 shrink-0" />
-                        <span className="text-sm font-semibold">{item.name}</span>
-                    </div>
-                    {isActive && (
-                        <ChevronRight className="w-4 h-4 relative z-10 opacity-70" />
+                    <Icon className="w-5 h-5 shrink-0 relative z-10" />
+                    {!isCollapsed && (
+                        <>
+                            <span className="text-sm font-semibold relative z-10 flex-1 truncate">
+                                {item.name}
+                            </span>
+                            {isActive && (
+                                <ChevronRight className="w-4 h-4 relative z-10 opacity-70" />
+                            )}
+                        </>
                     )}
                 </Link>
             </motion.div>
@@ -126,27 +146,28 @@ export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Ro
 
     return (
         <div className="flex flex-col h-full justify-between">
-            <nav className="px-3 py-4 space-y-1">
-                {/* ── Main items ─────────────────────────────────────────────── */}
+
+            {/* ── Nav links ───────────────────────────────────────────────── */}
+            <nav className={`py-4 ${isCollapsed ? 'flex flex-col items-center gap-1 px-3' : 'px-3 space-y-1'}`}>
                 {visibleMainItems.map((item, i) => renderNavLink(item, i))}
 
-                {/* ── Admin group ────────────────────────────────────────────── */}
                 {showAdminGroup && visibleAdminItems.length > 0 && (
-                    <div className="pt-3">
-                        {/* Section divider + label */}
-                        <div className={`flex items-center gap-2 px-4 pb-2 ${
-                            isDark ? 'text-stone-600' : 'text-stone-400'
-                        }`}>
-                            <div className={`flex-1 h-px ${isDark ? 'bg-stone-800' : 'bg-stone-200'}`} />
-                            <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                <ShieldCheck className="w-3 h-3" />
-                                Admin
-                            </span>
-                            <div className={`flex-1 h-px ${isDark ? 'bg-stone-800' : 'bg-stone-200'}`} />
-                        </div>
+                    <div className={`pt-3 ${isCollapsed ? 'w-full flex flex-col items-center' : ''}`}>
+                        {/* Section label (hidden when collapsed, replaced by a thin divider) */}
+                        {!isCollapsed ? (
+                            <div className={`flex items-center gap-2 px-4 pb-2 ${isDark ? 'text-stone-600' : 'text-stone-400'}`}>
+                                <div className={`flex-1 h-px ${isDark ? 'bg-stone-800' : 'bg-stone-200'}`} />
+                                <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                    <ShieldCheck className="w-3 h-3" />
+                                    Admin
+                                </span>
+                                <div className={`flex-1 h-px ${isDark ? 'bg-stone-800' : 'bg-stone-200'}`} />
+                            </div>
+                        ) : (
+                            <div className={`w-6 h-px mb-2 ${isDark ? 'bg-stone-700' : 'bg-stone-200'}`} />
+                        )}
 
-                        {/* Admin sub-links */}
-                        <div className="space-y-1">
+                        <div className={`${isCollapsed ? 'flex flex-col items-center gap-1 w-full' : 'space-y-1'}`}>
                             {visibleAdminItems.map((item, i) =>
                                 renderNavLink(item, visibleMainItems.length + i)
                             )}
@@ -155,30 +176,28 @@ export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Ro
                 )}
             </nav>
 
-           {/* ── Profile + Sign out ────────────────────────────────── */}
-            <div className={`p-3 border-t ${isDark ? 'border-stone-800' : 'border-stone-200'} space-y-1`}>
+            {/* ── Bottom: profile, sign out, collapse toggle ──────────────── */}
+            <div className={`p-3 border-t ${isDark ? 'border-stone-800' : 'border-stone-200'} ${isCollapsed ? 'flex flex-col items-center gap-1' : 'space-y-1'}`}>
+                {/* Profile */}
                 <Link
                     href="/profile"
-                    className={`
-                        w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold
-                        transition-colors
-                        ${pathname === '/profile'
-                            ? 'bg-linear-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/20'
-                            : isDark
-                            ? 'text-stone-400 hover:bg-stone-800 hover:text-stone-100'
-                            : 'text-stone-500 hover:bg-stone-100 hover:text-stone-900'
-                        }
-                    `}
+                    aria-label="My Profile"
+                    title={isCollapsed ? 'My Profile' : undefined}
+                    className={iconBtn(pathname === '/profile') + ' text-sm font-semibold'}
                 >
                     <UserCircle className="w-5 h-5" />
-                    My Profile
+                    {!isCollapsed && <span>My Profile</span>}
                 </Link>
 
+                {/* Sign Out */}
                 <button
                     onClick={() => signOut({ callbackUrl: '/login' })}
+                    aria-label="Sign Out"
+                    title={isCollapsed ? 'Sign Out' : undefined}
                     className={`
-                        w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold
-                        transition-colors
+                        flex items-center overflow-hidden rounded-xl
+                        transition-colors duration-200 text-sm font-semibold
+                        ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full gap-3 px-4 py-3'}
                         ${isDark
                             ? 'text-stone-400 hover:bg-stone-800 hover:text-rose-400'
                             : 'text-stone-500 hover:bg-rose-50 hover:text-rose-600'
@@ -186,8 +205,32 @@ export default function SidebarNav({ isDark, role }: { isDark: boolean; role: Ro
                     `}
                 >
                     <LogOut className="w-5 h-5" />
-                    Sign Out
+                    {!isCollapsed && <span>Sign Out</span>}
                 </button>
+
+                {/* Collapse toggle — only rendered on desktop (mobile passes onToggle as no-op) */}
+                {onToggle.toString() !== '() => {}' && (
+                    <button
+                        onClick={onToggle}
+                        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        className={`
+                            flex items-center overflow-hidden rounded-xl
+                            transition-colors duration-200 text-sm font-semibold
+                            ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full gap-3 px-4 py-3'}
+                            ${isDark
+                                ? 'text-stone-600 hover:bg-stone-800 hover:text-stone-400'
+                                : 'text-stone-400 hover:bg-stone-100 hover:text-stone-500'
+                            }
+                        `}
+                    >
+                        {isCollapsed
+                            ? <PanelLeftOpen className="w-4 h-4" />
+                            : <PanelLeftClose className="w-4 h-4" />
+                        }
+                        {!isCollapsed && <span>Collapse</span>}
+                    </button>
+                )}
             </div>
         </div>
     );

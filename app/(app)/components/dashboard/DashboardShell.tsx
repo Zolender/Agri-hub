@@ -18,26 +18,37 @@ export default function DashboardShell({
     session: any;
     role: Role;
 }) {
-    const [isDark, setIsDark] = useState(false);
+    const [isDark, setIsDark]             = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed]   = useState(false);
     const pathname = usePathname();
 
+    // Close mobile drawer on navigation
     useEffect(() => {
         setIsSidebarOpen(false);
     }, [pathname]);
 
+    // Restore persisted preferences
     useEffect(() => {
-        const saved = localStorage.getItem('darkMode');
-        if (saved !== null) {
-            setIsDark(saved === 'true');
-        }
+        const savedDark      = localStorage.getItem('darkMode');
+        const savedCollapsed = localStorage.getItem('sidebarCollapsed');
+        if (savedDark      !== null) setIsDark(savedDark === 'true');
+        if (savedCollapsed !== null) setIsCollapsed(savedCollapsed === 'true');
     }, []);
 
     const toggleDarkMode = () => {
-        const newMode = !isDark;
-        setIsDark(newMode);
-        localStorage.setItem('darkMode', String(newMode));
+        const next = !isDark;
+        setIsDark(next);
+        localStorage.setItem('darkMode', String(next));
     };
+
+    const toggleCollapsed = () => {
+        const next = !isCollapsed;
+        setIsCollapsed(next);
+        localStorage.setItem('sidebarCollapsed', String(next));
+    };
+
+    const sidebarBg = isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200';
 
     return (
         <DarkModeContext.Provider value={{ isDark, toggleDarkMode }}>
@@ -45,7 +56,7 @@ export default function DashboardShell({
                 className={`flex h-screen ${isDark ? 'bg-stone-950' : 'bg-[#fafaf9]'} transition-colors duration-300 overflow-hidden`}
                 style={{ fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif" }}
             >
-                {/* Mobile Overlay */}
+                {/* ── Mobile backdrop ─────────────────────────────────────── */}
                 <AnimatePresence>
                     {isSidebarOpen && (
                         <motion.div
@@ -58,64 +69,71 @@ export default function DashboardShell({
                     )}
                 </AnimatePresence>
 
-                {/* Sidebar - Desktop */}
+                {/* ── Desktop sidebar ─────────────────────────────────────── */}
                 <aside
+                    style={{ width: isCollapsed ? 64 : 256 }}
                     className={`
-                        w-64 h-screen shrink-0
-                        ${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} 
-                        border-r flex-col transition-colors
-                        hidden lg:flex
+                        hidden lg:flex flex-col h-screen shrink-0
+                        border-r transition-[width] duration-300 ease-in-out overflow-hidden
+                        ${sidebarBg}
                     `}
                 >
-                    {/* Logo Header with Dark Mode Toggle */}
-                    <div className={`p-6 border-b ${isDark ? 'border-stone-800' : 'border-stone-200'}`}>
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                <motion.div
-                                    whileHover={{ rotate: 360 }}
-                                    transition={{ duration: 0.6 }}
-                                    className="w-9 h-9 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl grid place-items-center shrink-0 shadow-lg shadow-emerald-600/20"
-                                >
-                                    <Leaf className="w-5 h-5 text-white" strokeWidth={2.5} />
-                                </motion.div>
+                    {/* Logo + dark-mode toggle */}
+                    <div className={`
+                        shrink-0 border-b ${isDark ? 'border-stone-800' : 'border-stone-200'}
+                        ${isCollapsed ? 'flex flex-col items-center gap-2 p-3' : 'flex items-center justify-between pl-5 pr-4 py-4'}
+                    `}>
+                        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5 flex-1 min-w-0'}`}>
+                            <motion.div
+                                whileHover={{ rotate: 360 }}
+                                transition={{ duration: 0.6 }}
+                                className="w-9 h-9 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl grid place-items-center shrink-0 shadow-lg shadow-emerald-600/20"
+                            >
+                                <Leaf className="w-5 h-5 text-white" strokeWidth={2.5} />
+                            </motion.div>
+
+                            {!isCollapsed && (
                                 <h2
-                                    className={`text-lg font-black ${isDark ? 'text-stone-100' : 'text-stone-900'} tracking-tight truncate`}
+                                    className={`text-lg font-black tracking-tight truncate ${isDark ? 'text-stone-100' : 'text-stone-900'}`}
                                     style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
                                 >
                                     Agri<span className="text-emerald-600">Hub</span>
                                 </h2>
-                            </div>
-
-                            {/* Dark Mode Toggle */}
-                            <motion.button
-                                onClick={toggleDarkMode}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className={`p-2 rounded-lg transition-colors ${
-                                    isDark
-                                        ? 'bg-stone-800 text-amber-400 hover:bg-stone-700'
-                                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                                }`}
-                                aria-label="Toggle dark mode"
-                            >
-                                <motion.div
-                                    initial={{ rotate: 0 }}
-                                    animate={{ rotate: isDark ? 180 : 0 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                                </motion.div>
-                            </motion.button>
+                            )}
                         </div>
+
+                        <motion.button
+                            onClick={toggleDarkMode}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label="Toggle dark mode"
+                            className={`p-2 rounded-lg transition-colors shrink-0 ${
+                                isDark
+                                    ? 'bg-stone-800 text-amber-400 hover:bg-stone-700'
+                                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                            }`}
+                        >
+                            <motion.div
+                                animate={{ rotate: isDark ? 180 : 0 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                            </motion.div>
+                        </motion.button>
                     </div>
 
-                    {/* Navigation */}
-                    <div className="flex-1 overflow-y-auto">
-                        <SidebarNav isDark={isDark} role={role} />
+                    {/* Nav (scrollable) */}
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                        <SidebarNav
+                            isDark={isDark}
+                            role={role}
+                            isCollapsed={isCollapsed}
+                            onToggle={toggleCollapsed}
+                        />
                     </div>
                 </aside>
 
-                {/* Mobile Sidebar */}
+                {/* ── Mobile sidebar (overlay drawer) ─────────────────────── */}
                 <AnimatePresence>
                     {isSidebarOpen && (
                         <motion.aside
@@ -123,54 +141,58 @@ export default function DashboardShell({
                             animate={{ x: 0 }}
                             exit={{ x: -300 }}
                             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                            className={`
-                                fixed z-50 h-screen w-64 
-                                ${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} 
-                                border-r flex flex-col transition-colors
-                                lg:hidden
-                            `}
+                            className={`fixed z-50 h-screen w-64 border-r flex flex-col lg:hidden ${sidebarBg}`}
                         >
-                            <div className={`p-6 border-b ${isDark ? 'border-stone-800' : 'border-stone-200'}`}>
-                                <div className="flex items-center justify-between gap-3">
-                                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                        <div className="w-9 h-9 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl grid place-items-center shrink-0 shadow-lg shadow-emerald-600/20">
-                                            <Leaf className="w-5 h-5 text-white" strokeWidth={2.5} />
-                                        </div>
-                                        <h2
-                                            className={`text-lg font-black ${isDark ? 'text-stone-100' : 'text-stone-900'} tracking-tight truncate`}
-                                            style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
-                                        >
-                                            Agri<span className="text-emerald-600">Hub</span>
-                                        </h2>
+                            <div className={`shrink-0 p-5 border-b ${isDark ? 'border-stone-800' : 'border-stone-200'} flex items-center justify-between gap-3`}>
+                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                    <div className="w-9 h-9 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl grid place-items-center shrink-0 shadow-lg shadow-emerald-600/20">
+                                        <Leaf className="w-5 h-5 text-white" strokeWidth={2.5} />
                                     </div>
-                                    <button
-                                        onClick={() => setIsSidebarOpen(false)}
-                                        className={`p-2 rounded-lg transition-colors ${
-                                            isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-100'
-                                        }`}
+                                    <h2
+                                        className={`text-lg font-black tracking-tight truncate ${isDark ? 'text-stone-100' : 'text-stone-900'}`}
+                                        style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
                                     >
-                                        <X className={`w-5 h-5 ${isDark ? 'text-stone-400' : 'text-stone-600'}`} />
-                                    </button>
+                                        Agri<span className="text-emerald-600">Hub</span>
+                                    </h2>
                                 </div>
+                                <button
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    aria-label="Close menu"
+                                    className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-100'}`}
+                                >
+                                    <X className={`w-5 h-5 ${isDark ? 'text-stone-400' : 'text-stone-600'}`} />
+                                </button>
                             </div>
+
                             <div className="flex-1 overflow-y-auto">
-                                <SidebarNav isDark={isDark} role={role} />
+                                {/* Mobile always shows expanded nav, no collapse toggle */}
+                                <SidebarNav
+                                    isDark={isDark}
+                                    role={role}
+                                    isCollapsed={false}
+                                    onToggle={() => {}}
+                                />
                             </div>
                         </motion.aside>
                     )}
                 </AnimatePresence>
 
-                {/* Main Content */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    {/* Mobile Top Bar */}
+                {/* ── Main content area ───────────────────────────────────── */}
+                <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+                    {/* Mobile top bar */}
                     <motion.header
                         initial={{ y: -100 }}
                         animate={{ y: 0 }}
-                        className={`lg:hidden ${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} border-b px-4 py-3 flex items-center justify-between sticky top-0 z-30`}
+                        className={`
+                            lg:hidden sticky top-0 z-30 border-b px-4 py-3
+                            flex items-center justify-between
+                            ${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'}
+                        `}
                     >
                         <button
                             onClick={() => setIsSidebarOpen(true)}
-                            className={`p-2 rounded-lg ${isDark ? 'hover:bg-stone-800 text-stone-300' : 'hover:bg-stone-100 text-stone-600'} transition-colors`}
+                            aria-label="Open menu"
+                            className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-stone-800 text-stone-300' : 'hover:bg-stone-100 text-stone-600'}`}
                         >
                             <Menu className="w-6 h-6" />
                         </button>
@@ -187,14 +209,10 @@ export default function DashboardShell({
                         <motion.button
                             onClick={toggleDarkMode}
                             whileTap={{ scale: 0.9 }}
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDark ? 'hover:bg-stone-800 text-amber-400' : 'hover:bg-stone-100 text-stone-600'
-                            }`}
+                            aria-label="Toggle dark mode"
+                            className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-stone-800 text-amber-400' : 'hover:bg-stone-100 text-stone-600'}`}
                         >
-                            <motion.div
-                                animate={{ rotate: isDark ? 180 : 0 }}
-                                transition={{ duration: 0.3 }}
-                            >
+                            <motion.div animate={{ rotate: isDark ? 180 : 0 }} transition={{ duration: 0.3 }}>
                                 {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                             </motion.div>
                         </motion.button>
