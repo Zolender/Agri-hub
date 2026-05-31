@@ -32,8 +32,8 @@ const coverageDaysColor = (days: number | null, isDark: boolean) => {
 
 const fulfillmentColor = (rate: number | null, isDark: boolean) => {
     if (rate === null) return isDark ? 'text-stone-600' : 'text-stone-400';
-    if (rate < 0.6)   return 'text-red-500 font-semibold';
-    if (rate < 0.8)   return 'text-amber-500';
+    if (rate < 60)   return 'text-red-500 font-semibold';
+    if (rate < 80)   return 'text-amber-500';
     return isDark ? 'text-emerald-400' : 'text-emerald-600';
 };
 
@@ -231,7 +231,7 @@ const StockOnHandTable = ({
                                             {/* Fulfillment Rate */}
                                             <td className={`px-6 py-4 whitespace-nowrap text-sm ${fulfillmentColor(product.fulfillmentRate, isDark)}`}>
                                                 {product.fulfillmentRate !== null
-                                                    ? `${(product.fulfillmentRate * 100).toFixed(1)}%`
+                                                    ? `${product.fulfillmentRate.toFixed(1)}%`
                                                     : '—'}
                                             </td>
 

@@ -117,9 +117,10 @@ export default async function DashboardPage() {
         0
     );
 
+    // fulfillmentRatio is stored as a percentage value (e.g. 87, not 0.87)
     const fulfillmentRate =
         fulfillmentData._avg.fulfillmentRatio !== null
-            ? (fulfillmentData._avg.fulfillmentRatio * 100).toFixed(1)
+            ? fulfillmentData._avg.fulfillmentRatio.toFixed(1)
             : null;
 
     const recentlySoldIds = new Set(recentSaleIds.map(t => t.productId));
