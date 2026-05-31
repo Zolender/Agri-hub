@@ -2,19 +2,23 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { 
-    Package, 
-    AlertTriangle, 
-    BadgeDollarSign, 
+import {
+    Package,
+    AlertTriangle,
+    BadgeDollarSign,
     Activity,
-    LucideIcon 
+    RefreshCcw,
+    Target,
+    TrendingDown,
+    Lock,
+    LucideIcon,
 } from 'lucide-react';
 import { useDarkMode } from '../DarkModeContext'; // ← NEW
 
 interface AnimatedStatCardProps {
     title: string;
     value: string | number;
-    iconName: 'Package' | 'AlertTriangle' | 'BadgeDollarSign' | 'Activity';
+    iconName: 'Package' | 'AlertTriangle' | 'BadgeDollarSign' | 'Activity' | 'RefreshCcw' | 'Target' | 'TrendingDown' | 'Lock';
     description?: string;
     trend?: {
         value: number;
@@ -27,6 +31,10 @@ const iconMap: Record<string, LucideIcon> = {
     AlertTriangle,
     BadgeDollarSign,
     Activity,
+    RefreshCcw,
+    Target,
+    TrendingDown,
+    Lock,
 };
 
 export default function AnimatedStatCard({ title, value, iconName, description, trend }: AnimatedStatCardProps) {
