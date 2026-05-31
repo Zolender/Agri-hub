@@ -8,7 +8,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     if (!session) redirect("/login");
 
     return (
-        <DashboardShell session={session} role={session.user?.role as Role ?? 'ANALYST'}>
+        <DashboardShell role={session.user?.role as Role ?? 'ANALYST'}>
             {children}
         </DashboardShell>
     );

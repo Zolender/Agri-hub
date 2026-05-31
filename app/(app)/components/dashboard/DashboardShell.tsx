@@ -11,11 +11,9 @@ export type Role = 'ADMIN' | 'MANAGER' | 'ANALYST';
 
 export default function DashboardShell({
     children,
-    session,
     role,
 }: {
     children: React.ReactNode;
-    session: any;
     role: Role;
 }) {
     const [isDark, setIsDark]             = useState(false);
@@ -122,13 +120,14 @@ export default function DashboardShell({
                         </motion.button>
                     </div>
 
-                    {/* Nav (scrollable) */}
-                    <div className="flex-1 overflow-y-auto min-h-0">
+                    {/* Nav (scrollable, scrollbar hidden visually) */}
+                    <div className="flex-1 overflow-y-auto min-h-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         <SidebarNav
                             isDark={isDark}
                             role={role}
                             isCollapsed={isCollapsed}
                             onToggle={toggleCollapsed}
+                            showCollapseToggle
                         />
                     </div>
                 </aside>
@@ -164,13 +163,13 @@ export default function DashboardShell({
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto">
-                                {/* Mobile always shows expanded nav, no collapse toggle */}
+                            <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                                 <SidebarNav
                                     isDark={isDark}
                                     role={role}
                                     isCollapsed={false}
                                     onToggle={() => {}}
+                                    showCollapseToggle={false}
                                 />
                             </div>
                         </motion.aside>

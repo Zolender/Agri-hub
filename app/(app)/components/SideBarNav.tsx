@@ -40,11 +40,13 @@ export default function SidebarNav({
     role,
     isCollapsed,
     onToggle,
+    showCollapseToggle = true,
 }: {
     isDark: boolean;
     role: Role;
     isCollapsed: boolean;
     onToggle: () => void;
+    showCollapseToggle?: boolean;
 }) {
     const pathname = usePathname();
 
@@ -94,7 +96,7 @@ export default function SidebarNav({
     const iconBtn = (isActive: boolean) => `
         relative flex items-center overflow-hidden rounded-xl
         transition-colors duration-200
-        ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full gap-3 px-4 py-3'}
+        ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full gap-3 px-4 py-2.5'}
         ${isActive
             ? 'bg-linear-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/20'
             : isDark
@@ -208,8 +210,7 @@ export default function SidebarNav({
                     {!isCollapsed && <span>Sign Out</span>}
                 </button>
 
-                {/* Collapse toggle — only rendered on desktop (mobile passes onToggle as no-op) */}
-                {onToggle.toString() !== '() => {}' && (
+                {showCollapseToggle && (
                     <button
                         onClick={onToggle}
                         aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
