@@ -19,6 +19,7 @@ export default async function DashboardPage() {
         fulfillmentData,
         recentSaleIds,
         recentSalesUnits,
+        salesByProduct,
     ] = await Promise.all([
         prisma.product.findMany({
             select: {
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
                 unitOfMeasure: true,
                 unitCostRwf: true,
                 sellingPriceRwf: true,
-                landedCostRwf: true,        // ← Group A fix: was missing from select
+                landedCostRwf: true,
                 quantity: true,
                 reorderPointUnits: true,
             },
@@ -60,6 +61,15 @@ export default async function DashboardPage() {
         }),
         // Turnover Rate: total units sold in last 30 days
         prisma.transaction.aggregate({
+            where: {
+                movementType: "Sale",
+                transactionDate: { gte: thirtyDaysAgo },
+            },
+            _sum: { quantityOrderedUnits: true },
+        }),
+        // Coverage Days: units sold per product in last 30 days
+        prisma.transaction.groupBy({
+            by: ["productId"],
             where: {
                 movementType: "Sale",
                 transactionDate: { gte: thirtyDaysAgo },
@@ -100,6 +110,22 @@ export default async function DashboardPage() {
             ? Math.round((totalSalesUnits30d / totalCurrentStock) * 10) / 10
             : 0;
 
+    // Coverage Days per product: null means no sales recorded in the window
+    const salesMap = new Map(
+        salesByProduct.map(s => [s.productId, s._sum.quantityOrderedUnits ?? 0])
+    );
+
+    const productsWithMetrics = products.map(p => {
+        const salesIn30d = salesMap.get(p.id) ?? 0;
+        const avgDailySales = salesIn30d / 30;
+        return {
+            ...p,
+            coverageDays: avgDailySales > 0
+                ? Math.round(p.quantity / avgDailySales)
+                : null,
+        };
+    });
+
     return (
         <div className="space-y-8">
             <DashboardHeader lastUpdated={lastUpdated} />
@@ -135,7 +161,7 @@ export default async function DashboardPage() {
             </div>
 
             <div>
-                <StockOnHandTable products={products} userRole={userRole} />
+                <StockOnHandTable products={productsWithMetrics} userRole={userRole} />
             </div>
         </div>
     );
