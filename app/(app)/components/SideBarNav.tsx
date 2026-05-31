@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import {
     LayoutDashboard,
     History,
+    Boxes,
     FileUp,
     ShieldCheck,
     ShoppingBag,
@@ -58,8 +59,9 @@ export default function SidebarNav({
     };
 
     const mainItems: NavItem[] = [
-        { name: 'Dashboard',     href: '/dashboard',      icon: LayoutDashboard, minRole: 'ANALYST' },
-        { name: 'Transactions',  href: '/transactions',   icon: History,         minRole: 'ANALYST' },
+        { name: 'Dashboard',     href: '/dashboard',            icon: LayoutDashboard, minRole: 'ANALYST' },
+        { name: 'Inventory',     href: '/dashboard/inventory', icon: Boxes,           minRole: 'ANALYST' },
+        { name: 'Transactions',  href: '/transactions',         icon: History,         minRole: 'ANALYST' },
         { name: 'Record Sale',   href: '/dashboard/sale', icon: ShoppingBag,     minRole: 'ANALYST' },
         { name: 'Receive Stock', href: '/dashboard/add',  icon: PackagePlus,     minRole: 'MANAGER' },
         { name: 'Import Data',   href: '/import',         icon: FileUp,          minRole: 'MANAGER' },

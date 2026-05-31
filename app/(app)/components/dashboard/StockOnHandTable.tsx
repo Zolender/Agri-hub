@@ -16,6 +16,7 @@ type Product = {
     reorderPointUnits: number;
     leadTimeBufferDays?: number;
     coverageDays: number | null;
+    fulfillmentRate: number | null;  // stored as 0-1 ratio
 };
 
 type UserRole = 'ADMIN' | 'MANAGER' | 'ANALYST';
@@ -27,6 +28,13 @@ const coverageDaysColor = (days: number | null, isDark: boolean) => {
     if (days < 7)  return 'text-red-500 font-semibold';
     if (days < 14) return 'text-amber-500 font-semibold';
     return isDark ? 'text-stone-200' : 'text-stone-900';
+};
+
+const fulfillmentColor = (rate: number | null, isDark: boolean) => {
+    if (rate === null) return isDark ? 'text-stone-600' : 'text-stone-400';
+    if (rate < 0.6)   return 'text-red-500 font-semibold';
+    if (rate < 0.8)   return 'text-amber-500';
+    return isDark ? 'text-emerald-400' : 'text-emerald-600';
 };
 
 const marginColor = (margin: number, isDark: boolean) => {
@@ -101,6 +109,7 @@ const StockOnHandTable = ({
         { label: "Category",         field: "categoryId" },
         { label: "Stock Level",      field: "quantity" },
         { label: "Coverage Days",    field: "coverageDays" },
+        { label: "Fulfillment %",    field: "fulfillmentRate" },
         { label: "Reorder Point",    field: "reorderPointUnits" },
         { label: "Status",           field: null },
         { label: "Landed Cost (RWF)", field: "landedCostRwf", right: true },
@@ -182,7 +191,7 @@ const StockOnHandTable = ({
                         <tbody className={`divide-y ${isDark ? 'bg-stone-900 divide-stone-700' : 'bg-white divide-gray-200'}`}>
                             {filteredAndSorted.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className={`px-6 py-8 text-center ${isDark ? 'text-stone-500' : 'text-gray-500'}`}>
+                                    <td colSpan={9} className={`px-6 py-8 text-center ${isDark ? 'text-stone-500' : 'text-gray-500'}`}>
                                         No products found
                                     </td>
                                 </tr>
@@ -217,6 +226,13 @@ const StockOnHandTable = ({
                                             {/* Coverage Days */}
                                             <td className={`px-6 py-4 whitespace-nowrap text-sm ${coverageDaysColor(product.coverageDays, isDark)}`}>
                                                 {product.coverageDays !== null ? `${product.coverageDays}d` : 'N/A'}
+                                            </td>
+
+                                            {/* Fulfillment Rate */}
+                                            <td className={`px-6 py-4 whitespace-nowrap text-sm ${fulfillmentColor(product.fulfillmentRate, isDark)}`}>
+                                                {product.fulfillmentRate !== null
+                                                    ? `${(product.fulfillmentRate * 100).toFixed(1)}%`
+                                                    : '—'}
                                             </td>
 
                                             {/* Reorder Point */}

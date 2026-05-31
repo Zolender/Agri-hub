@@ -1,18 +1,13 @@
 import prisma from "@/app/lib/db";
 import AnimatedStatCard from "@/app/(app)/components/dashboard/AnimatedStatCard";
-import StockOnHandTable from "../components/dashboard/StockOnHandTable";
 import AlertsPanel, { type AlertProduct, type ShipmentDelay } from "../components/dashboard/AlertsPanel";
 import { formatDistanceToNow } from "date-fns";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
-import { auth } from "@/app/lib/auth";
 
 // Shipments delayed beyond this many days are surfaced as warnings
 const PORT_DELAY_THRESHOLD = 2;
 
 export default async function DashboardPage() {
-    const session = await auth();
-    const userRole = (session?.user?.role ?? 'ANALYST') as 'ADMIN' | 'MANAGER' | 'ANALYST';
-
     const thirtyDaysAgo  = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const ninetyDaysAgo  = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
@@ -233,8 +228,6 @@ export default async function DashboardPage() {
                 shipmentDelays={shipmentDelays}
             />
 
-            {/* ── Section 5: Stock-on-Hand Table ────────────────────────── */}
-            <StockOnHandTable products={productsWithMetrics} userRole={userRole} />
         </div>
     );
 }
