@@ -5,10 +5,12 @@ import SectionLabel from "../components/dashboard/charts/SectionLabel";
 import FinancialMiniCard from "../components/dashboard/charts/FinancialMiniCard";
 import { formatDistanceToNow, format } from "date-fns";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
-import { StockStatusDonut, StockVelocityScatter, WeeklyTrendChart } from "../components/dashboard/charts/ChartClientWrappers";
+import { StockStatusDonut, StockVelocityScatter, WeeklyTrendChart, SalesByRegionBar, LostSalesTrendChart } from "../components/dashboard/charts/ChartClientWrappers";
 import type { StatusEntry } from "../components/dashboard/charts/StockStatusDonut";
 import type { VelocityPoint } from "../components/dashboard/charts/StockVelocityScatter";
 import type { TrendPoint } from "../components/dashboard/charts/WeeklyTrendChart";
+import type { RegionTrendPoint } from "../components/dashboard/charts/SalesByRegionBar";
+import type { LostTrendPoint } from "../components/dashboard/charts/LostSalesTrendChart";
 
 // Shipments delayed beyond this many days are surfaced as warnings
 const PORT_DELAY_THRESHOLD = 2;
@@ -105,6 +107,8 @@ export default async function DashboardPage() {
             where: { movementType: "Sale", transactionDate: { gte: twelveWeeksAgo } },
             select: {
                 quantityOrderedUnits: true,
+                lostSaleQtyUnits: true,
+                region: true,
                 transactionDate: true,
                 product: { select: { sellingPriceRwf: true } },
             },
@@ -223,6 +227,74 @@ export default async function DashboardPage() {
             revenue: Math.round(data.revenue),
         }));
 
+    // ── Regional trend data ────────────────────────────────────────────────────
+    // Build a week × region matrix, then cap to top-5 regions by total units
+
+    const regionWeekMap = new Map<string, { label: string; byRegion: Map<string, number> }>();
+    const regionTotals  = new Map<string, number>();
+
+    for (const txn of weeklyTransactions) {
+        const monday  = getWeekStart(txn.transactionDate);
+        const weekKey = monday.toISOString().split('T')[0];
+        const label   = format(monday, 'MMM d');
+
+        if (!regionWeekMap.has(weekKey)) {
+            regionWeekMap.set(weekKey, { label, byRegion: new Map() });
+        }
+        const slot = regionWeekMap.get(weekKey)!;
+        slot.byRegion.set(txn.region, (slot.byRegion.get(txn.region) ?? 0) + txn.quantityOrderedUnits);
+        regionTotals.set(txn.region, (regionTotals.get(txn.region) ?? 0) + txn.quantityOrderedUnits);
+    }
+
+    const topRegions = [...regionTotals.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([r]) => r);
+    const hasOther = regionTotals.size > 5;
+
+    const regionTrendData: RegionTrendPoint[] = Array.from(regionWeekMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([, { label, byRegion }]) => {
+            const point: RegionTrendPoint = { week: label };
+            for (const region of topRegions) {
+                point[region] = byRegion.get(region) ?? 0;
+            }
+            if (hasOther) {
+                let other = 0;
+                for (const [region, units] of byRegion.entries()) {
+                    if (!topRegions.includes(region)) other += units;
+                }
+                point['Other'] = other;
+            }
+            return point;
+        });
+
+    // ── Lost sales trend data ──────────────────────────────────────────────────
+    // Group lostSaleQtyUnits and their RWF value by week
+
+    const lostWeekMap = new Map<string, { label: string; units: number; value: number }>();
+
+    for (const txn of weeklyTransactions) {
+        const monday  = getWeekStart(txn.transactionDate);
+        const weekKey = monday.toISOString().split('T')[0];
+        const label   = format(monday, 'MMM d');
+
+        if (!lostWeekMap.has(weekKey)) {
+            lostWeekMap.set(weekKey, { label, units: 0, value: 0 });
+        }
+        const slot = lostWeekMap.get(weekKey)!;
+        slot.units += txn.lostSaleQtyUnits;
+        slot.value += txn.lostSaleQtyUnits * txn.product.sellingPriceRwf;
+    }
+
+    const lostTrendData: LostTrendPoint[] = Array.from(lostWeekMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([, { label, units, value }]) => ({
+            week:  label,
+            units,
+            value: Math.round(value),
+        }));
+
     // ── Alert data ─────────────────────────────────────────────────────────────
 
     const regionsMap = new Map<string, string[]>();
@@ -336,7 +408,16 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* ── Section 4: Alerts Panel ───────────────────────────────────── */}
+            {/* ── Section 4: Trends ─────────────────────────────────────────── */}
+            <div>
+                <SectionLabel title="Trends" />
+                <div className="flex flex-col gap-6">
+                    <SalesByRegionBar data={regionTrendData} />
+                    <LostSalesTrendChart data={lostTrendData} />
+                </div>
+            </div>
+
+            {/* ── Section 5: Alerts Panel ───────────────────────────────────── */}
             <AlertsPanel
                 reorderAlerts={reorderAlerts}
                 shipmentDelays={shipmentDelays}
