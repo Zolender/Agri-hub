@@ -45,9 +45,11 @@ export default function SalesByRegionBar({ data }: { data: RegionTrendPoint[] })
     const gridColor  = isDark ? '#292524' : '#f5f5f4';
     const axisColor  = isDark ? '#78716c' : '#a8a29e';
 
+    const cardBg = isDark ? 'bg-stone-900' : 'bg-white';
+
     if (data.length === 0) {
         return (
-            <div className="rounded-xl shadow bg-white dark:bg-stone-900 p-6 flex items-center justify-center h-75">
+            <div className={`rounded-xl shadow ${cardBg} p-6 flex items-center justify-center h-75`}>
                 <p className="text-stone-400 text-sm">No regional sales data for this period.</p>
             </div>
         );
@@ -56,7 +58,7 @@ export default function SalesByRegionBar({ data }: { data: RegionTrendPoint[] })
     const regions = Object.keys(data[0]).filter(k => k !== 'week');
 
     return (
-        <div className="rounded-xl shadow bg-white dark:bg-stone-900 p-6">
+        <div className={`rounded-xl shadow ${cardBg} p-6`}>
             <p className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-4">
                 Sales by Region
             </p>

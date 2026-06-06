@@ -6,13 +6,17 @@
 // from here, not from the chart files directly.
 
 import dynamic from 'next/dynamic';
+import { useDarkMode } from '@/app/(app)/components/DarkModeContext';
 
-const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
-    <div
-        className="rounded-xl shadow bg-stone-100 dark:bg-stone-800 animate-pulse"
-        style={{ height }}
-    />
-);
+function ChartSkeleton({ height = 300 }: { height?: number }) {
+    const { isDark } = useDarkMode();
+    return (
+        <div
+            className={`rounded-xl shadow animate-pulse ${isDark ? 'bg-stone-800' : 'bg-stone-100'}`}
+            style={{ height }}
+        />
+    );
+}
 
 export const StockStatusDonut = dynamic(
     () => import('./StockStatusDonut'),
