@@ -7,17 +7,24 @@
 
 import dynamic from 'next/dynamic';
 
+const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
+    <div
+        className="rounded-xl shadow bg-stone-100 dark:bg-stone-800 animate-pulse"
+        style={{ height }}
+    />
+);
+
 export const StockStatusDonut = dynamic(
     () => import('./StockStatusDonut'),
-    { ssr: false }
+    { ssr: false, loading: () => <ChartSkeleton height={310} /> }
 );
 
 export const StockVelocityScatter = dynamic(
     () => import('./StockVelocityScatter'),
-    { ssr: false }
+    { ssr: false, loading: () => <ChartSkeleton height={310} /> }
 );
 
 export const WeeklyTrendChart = dynamic(
     () => import('./WeeklyTrendChart'),
-    { ssr: false }
+    { ssr: false, loading: () => <ChartSkeleton height={310} /> }
 );
