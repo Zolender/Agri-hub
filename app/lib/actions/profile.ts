@@ -69,7 +69,8 @@ export async function changePasswordAction(data: {
 
         revalidatePath("/profile");
         return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
+    } catch (error) {
+        console.error('[changePasswordAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 }

@@ -2,7 +2,7 @@
 
 import prisma from "@/app/lib/db";
 import { auth } from "@/app/lib/auth";
-import {  success, z } from "zod";
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { TransactionCsvSchema, type TransactionRow } from "../validator/csv_schema";
 
@@ -111,9 +111,10 @@ export async function importInventoryAction(data: any[]){
                     }
                 }
                 if(lastError && attempts >= maxAttempts){
+                    console.error(`[importInventoryAction] row ${row.product_id}:`, lastError);
                     errors.push({
                         productId: row.product_id,
-                        error: lastError.message
+                        error: 'Row failed to import. Check the data and try again.'
                     })
                 }
             }
@@ -127,11 +128,8 @@ export async function importInventoryAction(data: any[]){
                 message: errors.length > 0? `Imported ${results.length} items, ${errors.length} failed`
                                             : `Successfully imported ${results.length} items`,
             }
-        }catch(error: any){
-            console.error("Import Action Error:", error)
-            return {
-                success: false,
-                error: error.message || "Import failed",
-            }
+        } catch (error) {
+            console.error('[importInventoryAction]:', error);
+            return { success: false, error: 'An unexpected error occurred. Please try again.' };
         }
     }

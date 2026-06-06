@@ -61,7 +61,8 @@ export async function createUserAction(data: {
         if (error.code === "P2002") {
             return { success: false, error: "A user with that email already exists." };
         }
-        return { success: false, error: error.message };
+        console.error('[createUserAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 }
 
@@ -99,8 +100,9 @@ export async function updateUserRoleAction(
 
         revalidatePath("/admin/users");
         return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
+    } catch (error) {
+        console.error('[updateUserRoleAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 }
 
@@ -132,7 +134,8 @@ export async function deleteUserAction(userId: string) {
 
         revalidatePath("/admin/users");
         return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
+    } catch (error) {
+        console.error('[deleteUserAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 }

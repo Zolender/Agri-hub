@@ -36,12 +36,9 @@ export async function resetInventoryAction(){
             message: `✅ Database reset complete. Deleted: ${deleted.products} products, ${deleted.transactions} transactions, ${deleted.shipments} shipments, ${deleted.fxRates} FX rates, ${deleted.metrics} metrics.`,
             deleted,
         }
-    }catch(error: any){
-        console.error("Reset Inventory Error:", error)
-        return {
-            success: false,
-            error: error.message || "Failed to reset inventory"
-        }
+    } catch (error) {
+        console.error('[resetInventoryAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 
 }

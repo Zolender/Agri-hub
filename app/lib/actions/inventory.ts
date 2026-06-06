@@ -98,8 +98,9 @@ export async function recordSaleAction(
         revalidatePath("/dashboard");
         revalidatePath("/transactions");
         return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
+    } catch (error) {
+        console.error('[recordSaleAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 }
 
@@ -155,8 +156,9 @@ export async function recordPurchaseAction(
         revalidatePath("/dashboard");
         revalidatePath("/transactions");
         return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
+    } catch (error) {
+        console.error('[recordPurchaseAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 }
 
@@ -206,7 +208,8 @@ export async function updateProductAction(
         revalidatePath("/dashboard");
         revalidatePath("/inventory");
         return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
+    } catch (error) {
+        console.error('[updateProductAction]:', error);
+        return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
 }
