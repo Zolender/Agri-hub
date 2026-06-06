@@ -45,12 +45,14 @@ export default function SalesByRegionBar({ data }: { data: RegionTrendPoint[] })
     const gridColor  = isDark ? '#292524' : '#f5f5f4';
     const axisColor  = isDark ? '#78716c' : '#a8a29e';
 
-    const cardBg = isDark ? 'bg-stone-900' : 'bg-white';
+    const cardBg    = isDark ? 'bg-stone-900' : 'bg-white';
+    const titleColor = isDark ? 'text-stone-300' : 'text-stone-700';
+    const emptyColor = isDark ? 'text-stone-600' : 'text-stone-400';
 
     if (data.length === 0) {
         return (
             <div className={`rounded-xl shadow ${cardBg} p-6 flex items-center justify-center h-75`}>
-                <p className="text-stone-400 text-sm">No regional sales data for this period.</p>
+                <p className={`text-sm ${emptyColor}`}>No regional sales data for this period.</p>
             </div>
         );
     }
@@ -59,7 +61,7 @@ export default function SalesByRegionBar({ data }: { data: RegionTrendPoint[] })
 
     return (
         <div className={`rounded-xl shadow ${cardBg} p-6`}>
-            <p className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-4">
+            <p className={`text-sm font-semibold ${titleColor} uppercase tracking-wide mb-4`}>
                 Sales by Region
             </p>
             <ResponsiveContainer width="100%" height={300}>
@@ -81,7 +83,7 @@ export default function SalesByRegionBar({ data }: { data: RegionTrendPoint[] })
                         content={<CustomTooltip />}
                         cursor={{ fill: 'rgba(168,162,158,0.08)' }}
                     />
-                    <Legend wrapperStyle={{ fontSize: 11, color: '#a8a29e' }} />
+                    <Legend wrapperStyle={{ fontSize: 11, color: axisColor }} />
                     {regions.map((region, i) => (
                         <Bar
                             key={region}
