@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Recharts tooltip: replace the default slide-in (transform transition) with a fade.
+   !important is required because Recharts sets transition as an inline style. */
+.recharts-tooltip-wrapper {
+  transition: opacity 150ms ease-in-out !important;
+}
