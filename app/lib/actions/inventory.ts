@@ -7,6 +7,9 @@ import { logAction } from "@/app/lib/utils/audit";
 import { AuditAction } from "@/app/generated/prisma/enums";
 
 export async function getProductPreview(id: string) {
+    const session = await auth();
+    if (!session) return null;
+
     return await prisma.product.findUnique({
         where: { id },
         select: {
@@ -23,6 +26,9 @@ export async function getProductPreview(id: string) {
 }
 
 export async function getPaginatedInventory(page: number = 1, search: string = "") {
+    const session = await auth();
+    if (!session) return { items: [], totalPages: 0, totalCount: 0 };
+
     const pageSize = 15;
     const skip = (page - 1) * pageSize;
 
