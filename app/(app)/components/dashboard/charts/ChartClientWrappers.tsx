@@ -28,3 +28,13 @@ export const WeeklyTrendChart = dynamic(
     () => import('./WeeklyTrendChart'),
     { ssr: false, loading: () => <ChartSkeleton height={310} /> }
 );
+
+export const SalesByRegionBar = dynamic(
+    () => import('./SalesByRegionBar'),
+    { ssr: false, loading: () => <ChartSkeleton height={310} /> }
+);
+
+export const LostSalesTrendChart = dynamic(
+    () => import('./LostSalesTrendChart'),
+    { ssr: false, loading: () => <ChartSkeleton height={310} /> }
+);
