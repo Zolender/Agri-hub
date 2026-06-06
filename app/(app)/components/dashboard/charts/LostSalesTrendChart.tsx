@@ -11,6 +11,7 @@ import {
     Legend,
     ResponsiveContainer,
 } from 'recharts';
+import { useDarkMode } from '@/app/(app)/components/DarkModeContext';
 
 export type LostTrendPoint = { week: string; units: number; value: number };
 
@@ -46,11 +47,15 @@ function CustomTooltip({
 }
 
 export default function LostSalesTrendChart({ data }: { data: LostTrendPoint[] }) {
+    const { isDark } = useDarkMode();
+    const gridColor  = isDark ? '#292524' : '#f5f5f4';
+    const axisColor  = isDark ? '#78716c' : '#a8a29e';
+
     const isEmpty = data.every(d => d.units === 0);
 
     if (isEmpty) {
         return (
-            <div className="rounded-xl shadow bg-white dark:bg-stone-900 p-6 flex items-center justify-center h-[300px]">
+            <div className="rounded-xl shadow bg-white dark:bg-stone-900 p-6 flex items-center justify-center h-75">
                 <p className="text-stone-400 text-sm">No lost sales recorded in this period.</p>
             </div>
         );
@@ -63,16 +68,16 @@ export default function LostSalesTrendChart({ data }: { data: LostTrendPoint[] }
             </p>
             <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={data} margin={{ top: 4, right: 24, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#44403c" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                     <XAxis
                         dataKey="week"
-                        tick={{ fontSize: 11, fill: '#a8a29e' }}
+                        tick={{ fontSize: 11, fill: axisColor }}
                         axisLine={false}
                         tickLine={false}
                     />
                     <YAxis
                         yAxisId="left"
-                        tick={{ fontSize: 11, fill: '#a8a29e' }}
+                        tick={{ fontSize: 11, fill: axisColor }}
                         axisLine={false}
                         tickLine={false}
                         unit=" u"
@@ -80,7 +85,7 @@ export default function LostSalesTrendChart({ data }: { data: LostTrendPoint[] }
                     <YAxis
                         yAxisId="right"
                         orientation="right"
-                        tick={{ fontSize: 11, fill: '#a8a29e' }}
+                        tick={{ fontSize: 11, fill: axisColor }}
                         axisLine={false}
                         tickLine={false}
                         tickFormatter={formatRwf}

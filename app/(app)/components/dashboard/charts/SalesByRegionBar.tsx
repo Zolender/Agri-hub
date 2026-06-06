@@ -10,10 +10,12 @@ import {
     Legend,
     ResponsiveContainer,
 } from 'recharts';
+import { useDarkMode } from '@/app/(app)/components/DarkModeContext';
 
 export type RegionTrendPoint = { week: string; [region: string]: number | string };
 
-const REGION_COLORS = ['#10b981', '#f59e0b', '#38bdf8', '#a78bfa', '#fb7185'];
+// Warm-toned palette consistent with the app's emerald/amber/stone design language
+const REGION_COLORS = ['#10b981', '#f59e0b', '#f97316', '#84cc16', '#06b6d4'];
 
 function CustomTooltip({
     active,
@@ -39,9 +41,13 @@ function CustomTooltip({
 }
 
 export default function SalesByRegionBar({ data }: { data: RegionTrendPoint[] }) {
+    const { isDark } = useDarkMode();
+    const gridColor  = isDark ? '#292524' : '#f5f5f4';
+    const axisColor  = isDark ? '#78716c' : '#a8a29e';
+
     if (data.length === 0) {
         return (
-            <div className="rounded-xl shadow bg-white dark:bg-stone-900 p-6 flex items-center justify-center h-[300px]">
+            <div className="rounded-xl shadow bg-white dark:bg-stone-900 p-6 flex items-center justify-center h-75">
                 <p className="text-stone-400 text-sm">No regional sales data for this period.</p>
             </div>
         );
@@ -56,15 +62,15 @@ export default function SalesByRegionBar({ data }: { data: RegionTrendPoint[] })
             </p>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#44403c" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                     <XAxis
                         dataKey="week"
-                        tick={{ fontSize: 11, fill: '#a8a29e' }}
+                        tick={{ fontSize: 11, fill: axisColor }}
                         axisLine={false}
                         tickLine={false}
                     />
                     <YAxis
-                        tick={{ fontSize: 11, fill: '#a8a29e' }}
+                        tick={{ fontSize: 11, fill: axisColor }}
                         axisLine={false}
                         tickLine={false}
                         unit=" u"
