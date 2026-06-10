@@ -1,247 +1,198 @@
-# Rwanda Agri-Hub: Development Roadmap
+# Rwanda AgriHub: Development Roadmap
 
-> **Status:** Phase 1 Complete ✅ → Phase 2 In Progress 🔧  
-> **Last Updated:** 2026-03-29
+> **Status:** Phase 2 Mostly Complete ✅ → Phase 3 (Analytics) In Progress 🔧  
+> **Last Updated:** 2026-06-10
 
 ---
 
-## 🎯 Mission
+## Mission
 Build a production-ready inventory management system for agri-input distributors in Rwanda.
 
 ---
 
-## ✅ Completed
+## Completed
 
-### Foundation
+### Foundation (2026-03-22)
 - [x] Next.js 16 + TypeScript setup
 - [x] Prisma 7 schema with PostgreSQL (Supabase)
 - [x] NextAuth v5 with role-based access (ADMIN, MANAGER, ANALYST)
 - [x] CSV import with chunking (handles 2,000+ rows)
 - [x] Server Actions for secure mutations
 - [x] Zod validation for data integrity
-- [x] Basic UI with Tailwind CSS
 - [x] Edge Runtime compatibility (split auth config)
 - [x] Database singleton pattern (Prisma 7 adapter)
-
-### Recent Additions (2026-03-22)
-- [x] Environment setup documentation (.env.example)
-- [x] Comprehensive development roadmap (ROADMAP.md)
-- [x] Testing infrastructure (Vitest)
-- [x] CSV validation tests (3 test cases)
+- [x] Vitest testing infrastructure + CSV validation tests
 - [x] Import retry logic (3 attempts with exponential backoff)
-- [x] Improved progress tracking (real-time updates)
-- [x] Public/protected route separation
+- [x] Public/protected route separation + middleware
 - [x] Landing page with dynamic auth state
-- [x] Middleware configuration for public routes
 
-### Recent Additions (2026-03-25)
-- [x] Last import timestamp on dashboard
-- [x] Error boundaries (error.tsx)
-- [x] Loading skeletons (loading.tsx)
-- [x] Transactions page foundation (basic table + pagination)
-- [x] Empty states for stock table
-- [x] Dashboard header as client component
+### Dashboard & Transactions (2026-03-25)
+- [x] 4 KPI cards with correct calculations
+- [x] Stock-on-hand table with search and sorting
+- [x] Last import timestamp with refresh
+- [x] Error boundaries (`error.tsx`) + loading skeletons (`loading.tsx`)
+- [x] Transactions page with pagination, date/type/region/product filters
+- [x] Empty states
 
-### Recent Additions (2026-03-28)
-- [x] Transaction / stock row detail modal (ProductDetailModal) with role-gated editing
-- [x] StockOnHandTable wired with click-to-open modal + userRole prop
-- [x] updateProductAction used from modal (MANAGER/ADMIN only, ANALYST read-only)
+### Admin & Auth Hardening (2026-03-28)
+- [x] `ProductDetailModal` — click stock row for full details; role-gated editing
 - [x] Admin User Management page (`/admin/users`)
-- [x] Server actions for user CRUD: createUserAction, updateUserRoleAction, deleteUserAction
-- [x] UsersTable with role badges, initials avatar, self-protection on action buttons
-- [x] CreateUserModal — bcrypt hashed password, duplicate email guard
-- [x] EditRoleModal — live role description, disabled Save when no change
-- [x] DangerModal reused for delete confirmation
-- [x] AdminPageHeader component (client, dark-mode aware, consistent with app style)
-- [x] Clean URL via `(users)` route group (`/admin/users` not `/admin/users/users`)
-- [x] CSV export for transactions (`/api/transactions/export`) — filter-aware, auth-checked, 10k row limit
-- [x] FiltersBar Export CSV button wired to API route
-- [x] Sale page + SalePageHeader + SalePageSidebar (dark mode)
-- [x] QuickAdd (Receive Stock) page + QuickAddHeader with role validation
-- [x] Auth checks hardened on sale and purchase server actions
-- [x] Deployed to Vercel production (agrihub-z.vercel.app)
+- [x] Server actions: `createUserAction`, `updateUserRoleAction`, `deleteUserAction` with self-protection guards
+- [x] `UsersTable`, `CreateUserModal`, `EditRoleModal`, `DangerModal`
+- [x] CSV export for transactions (`/api/transactions/export` — filter-aware, 10k limit)
+- [x] Sale page + QuickAdd (Receive Stock) page
+- [x] Auth hardened on sale and purchase server actions
+- [x] Deployed to Vercel (agrihub-z.vercel.app)
+- [x] AuditLog model + `/admin/audit` page (dark mode, server fetch + client render)
+- [x] Database indexes on products and transactions
 
-### Challenges Solved (18 total)
-- [x] Prisma v7 driver adapter configuration
-- [x] Edge Runtime crypto module compatibility
-- [x] Database seeding in Prisma 7
-- [x] File extension sensitivity (.ts vs .tsx)
-- [x] NextAuth role-based access control
-- [x] Schema-code naming alignment (snake_case → camelCase)
-- [x] CSV "ghost row" greedy parsing
-- [x] Session context in Server Actions
-- [x] Zod v3.x error handling
-- [x] Infinite redirect loop (middleware + layout)
-- [x] Client-side context (SessionProvider)
-- [x] 1MB payload limit (client-side chunking)
-- [x] Prisma transaction timeout (Promise.all instead)
-- [x] Navigation protection during import
-- [x] Server vs client component boundary for dark mode (AdminPageHeader pattern)
-- [x] Self-protection guards in admin actions (can't delete/demote own account)
-- [x] `emailVerified` not populated for Credentials users — column removed, noted for future OAuth
-- [x] `useTransition` for server action calls without blocking UI (spinner pattern)
-- [x] NEXTAUTH_URL env var mismatch after domain rename — fixed in Vercel
+### KPI Upgrade & Dashboard Charts (2026-04 to 2026-05)
+- [x] Replaced placeholder KPI cards with correct business metrics:
+  - Turnover Rate (annualized), Fulfillment Rate (%), Lost Sales Value (RWF), Capital Lock (RWF)
+- [x] Fixed Capital Lock to use `landedCostRwf` (not `unitCostRwf`)
+- [x] Recharts integrated (Group A): Stock Status Donut chart
+- [x] Group B: Stock Velocity Scatter plot (units moved vs. coverage days)
+- [x] Group C: Weekly Trend chart (stacked area — fulfilled vs. ordered, 12 weeks)
+- [x] Group D: Alerts Panel (reorder alerts + shipment delays) + Financial Mini Cards
+- [x] Group E: Sales by Region Bar chart (grouped, top 5 regions, 12 weeks)
+- [x] Group E: Lost Sales Trend chart (ComposedChart — bars + line, dual Y-axis)
+- [x] All charts wrapped with `next/dynamic` (`ssr: false`) via `ChartClientWrappers.tsx`
 
----
+### Inventory Table Upgrade (2026-05)
+- [x] Added Coverage Days, Fulfillment %, Landed Cost (RWF), Margin % columns to `StockOnHandTable`
+- [x] Per-product fulfillment computed via raw SQL (avoids N+1)
 
-## 🚧 Phase 1: Foundation & Core Features
+### Sidebar & Dark Mode (2026-05)
+- [x] Sidebar collapsible (state persisted to `localStorage`)
+- [x] Dark mode via `DarkModeContext` + `localStorage` key `agri-dark-mode`
+- [x] All dashboard pages and charts respond to dark mode toggle
+- [x] Chart dynamic background colors (fills, strokes) adapt to dark/light
 
-### 1.1 Documentation & Setup
-- [x] Create `.env.example` with all required variables
-- [x] Add setup instructions to README
-- [ ] Document database schema design decisions
-- [ ] Add API documentation (Server Actions)
+### Monitoring & Security (2026-05)
+- [x] Sentry error tracking integrated
+- [x] Upstash Redis rate limiting on login (with UI feedback)
+- [x] Health check endpoint (`/api/health`)
+- [x] UptimeRobot monitoring configured
 
-### 1.2 Code Quality & Testing
-- [x] Install Vitest + testing dependencies
-- [x] Write CSV validation tests (Zod schemas)
-- [ ] Write Server Action tests (import logic)
-- [ ] Add ESLint rules for best practices
-- [x] Set up Prettier for consistent formatting
-- [ ] Add pre-commit hooks (Husky + lint-staged)
-
-### 1.3 Project Structure Refactoring
-- [x] Refactor `app/app/` → `app/(app)/` route group
-- [x] Refactor `app/login/` → `app/(public)/login/`
-- [x] Create `app/(public)/page.tsx` (landing page)
-- [x] Organize components into feature folders (`dashboard/`, `admin/`, `transactions/`, `import/`)
-- [x] Move shared utilities to `lib/utils/`
-- [x] Create `lib/schemas/` for Zod schemas
-
-### 1.4 Import Feature (Polish)
-- [x] Add retry logic (3 attempts per row)
-- [x] Improve progress tracking (show row numbers)
-- [x] Add "partial success" UI (show failed rows)
-- [x] Add "download error report" button (CSV export)
-- [x] Add import history tracking (who imported when)
-- [x] Add file size validation (warn if >5MB)
-
-### 1.5 Dashboard
-- [x] Fix KPI cards (total products, low stock, recent imports)
-- [x] Add stock-on-hand table with sorting
-- [x] Add search/filter functionality
-- [x] Add "low stock alerts" section
-- [x] Add last import timestamp
-- [x] Add role-based dashboard views (ProductDetailModal gates Edit to MANAGER/ADMIN)
-
-### 1.6 Transactions Page
-- [x] Basic page structure + table
-- [x] Server-side pagination
-- [x] Implement date range filter
-- [x] Implement movement type filter
-- [x] Implement region filter
-- [x] Add product search
-- [x] Transaction row detail modal (ProductDetailModal, role-gated)
-- [x] Add CSV export functionality (`/api/transactions/export` route)
+### Landing & Login Redesign (2026-06)
+- [x] Full landing page redesign — deep emerald gradient hero (Direction C)
+- [x] Scroll-aware nav (transparent at top → themed on scroll)
+- [x] Glassmorphism preview card in hero
+- [x] Dark ticker strip, animated with Framer Motion
+- [x] Removed all non-functional UI elements (Watch Demo, Learn More)
+- [x] Login page dark mode (reads `agri-dark-mode` from localStorage)
+- [x] Unified localStorage key across landing and login pages
 
 ---
 
-## 🔧 Phase 2: Production Readiness
+## Phase 2: Production Readiness
 
 ### 2.1 Error Handling & Logging
-- [ ] Add structured logging (Pino)
-- [ ] Add error tracking (Sentry integration)
+- [x] Error tracking (Sentry)
+- [ ] Structured logging (Pino)
 - [ ] Improve Server Action error messages
-- [ ] Add database query error handling
-- [ ] Add network error retry logic
 
 ### 2.2 Performance Optimization
-- [x] Add database indexes (products, transactions)  ← ✅ done tonight
+- [x] Database indexes (products, transactions)
 - [ ] Analyze slow queries (EXPLAIN ANALYZE)
-- [ ] Implement React.lazy for code splitting
 - [ ] Add caching strategy (React Cache)
-- [ ] Optimize bundle size
 
 ### 2.3 Security Hardening
-- [ ] Add rate limiting (Upstash Redis or in-memory)
-- [ ] Implement audit logs (who did what, when)  ← moved to 2.4
-- [ ] Add session timeout configuration
-- [x] Add password strength requirements  ← ✅ done tonight
-- [ ] Add 2FA support (optional, future)
+- [x] Rate limiting on login (Upstash Redis)
+- [x] Audit logs for all mutations
+- [x] Password strength requirements
+- [ ] Session timeout configuration
+- [ ] 2FA (optional, future)
 
-### 2.4 Audit Log ✅
-- [x] AuditLog model + AuditAction enum in schema.prisma
-- [x] logAction() helper in lib/utils/audit.ts
-- [x] Wired into admin.ts (CREATE_USER, UPDATE_ROLE, DELETE_USER)
-- [x] Wired into inventory.ts (UPDATE_PRODUCT, RECORD_SALE, RECORD_PURCHASE)
-- [x] /admin/audit page — server fetch + client render (dark mode)
-- [x] Sidebar grouped Admin section (Users + Audit Log, ADMIN only)
-- [ ] Add user activity logs pagination (future)
+### 2.4 Deployment
+- [x] Deployed to Vercel
+- [x] Environment variables configured
+- [x] Supabase connection pooling
+- [x] Health check endpoint
+- [x] UptimeRobot monitoring
+- [ ] Database backup strategy documentation
 
-### 2.5 Deployment
-- [x] Deploy to Vercel (free tier)
-- [x] Set up environment variables in Vercel
-- [x] Configure Supabase connection pooling
-- [x] Add health check endpoint (/api/health)  
-- [x] UptimeRobot monitoring configured
-- [ ] Add deployment checklist
-- [ ] Test with production data
-- [ ] Add database backup strategy documentation
 ---
 
-## 🚀 Phase 3: Advanced Features
+## Phase 3: Analytics & Advanced Features
 
 ### 3.1 Data Export
-- [x] Add CSV export for transactions
-- [ ] Add CSV export for products
-- [ ] Add PDF report generation (optional)
-- [ ] Add scheduled reports (email digest)
+- [x] CSV export for transactions
+- [ ] CSV export for products / stock-on-hand table
+- [ ] PDF report generation (optional)
 
 ### 3.2 Multi-SKU Order Support
 - [ ] Design order schema (multiple products per order)
-- [ ] Create order entry UI
-- [ ] Add order fulfillment tracking
-- [ ] Add order history page
+- [ ] Order entry UI
+- [ ] Order fulfillment tracking
+- [ ] Order history page
 
-### 3.3 Analytics & Insights
-- [ ] Add charts (Recharts or Chart.js)
-  - [ ] Stock trends over time
-  - [ ] Sales by region
-  - [ ] Top-selling products
-  - [ ] Inventory turnover rate
-- [ ] Add forecasting (simple moving average)
-- [ ] Add demand planning alerts
+### 3.3 Analytics & Insights (core complete ✅)
+- [x] Stock Status Donut chart
+- [x] Stock Velocity Scatter
+- [x] Weekly sales trend (stacked area)
+- [x] Sales by region (grouped bar)
+- [x] Lost sales trend (ComposedChart)
+- [x] Inventory turnover rate KPI
+- [ ] Group F: Shrinkage Rate, Supplier Reliability, Lead-Time Deviation charts
+- [ ] Back-Cast Engine (pure SQL — did manual reorder points actually prevent stockouts?)
+- [ ] Demand forecasting (simple moving average)
 
 ### 3.4 Supplier & Customer Management
-- [ ] Add supplier table (schema update)
-- [ ] Add customer table (schema update)
-- [ ] Add supplier CRUD pages
-- [ ] Add customer CRUD pages
+- [ ] Supplier table (schema update)
+- [ ] Customer table (schema update)
+- [ ] Supplier/customer CRUD pages
 - [ ] Link transactions to suppliers/customers
 
 ### 3.5 Mobile Responsiveness
 - [ ] Audit mobile layout (all pages)
-- [ ] Optimize tables for mobile (horizontal scroll or cards)
-- [ ] Add mobile navigation menu
-- [ ] Test on real mobile devices
+- [ ] Optimize tables for mobile
+- [ ] Test on real devices
 
 ---
 
-## 🎨 Phase 4: UX Enhancements
+## Phase 4: Intelligence Layer (ML)
 
-### 4.1 Onboarding
-- [ ] Add first-time user tour (React Joyride)
-- [ ] Add sample data seeder (demo mode)
-- [ ] Add contextual help tooltips
-- [ ] Add video tutorials (optional)
+### 4.1 Back-Cast Engine (no Python required)
+- [ ] Pure SQL query: did `reorderPointUnits` actually prevent stockouts per product?
+- [ ] Surface as an "accuracy score" on the inventory page
+- [ ] Prove ROI before touching ML
 
-### 4.2 Accessibility (a11y)
-- [ ] Run axe-core accessibility audit
-- [ ] Add proper ARIA labels
-- [ ] Ensure keyboard navigation works
-- [ ] Test with screen reader (NVDA/JAWS)
-- [ ] Add focus indicators
-- [ ] Add skip-to-content link
+### 4.2 Python Microservice (FastAPI on Railway/Render)
+- [ ] Lead-time forecasting (regression on `Shipment` data)
+- [ ] Reorder signal (time-series on `Transaction` data)
+- [ ] Called from Next.js via HTTP Route Handler
 
-### 4.3 Internationalization (i18n)
-- [ ] Add i18n library (next-intl)
-- [ ] Add English translations
-- [ ] Add French translations (Kinyarwanda optional)
-- [ ] Add language switcher
+### 4.3 Intelligence Dashboard Panel
+- [ ] FX Watch — current RWF/USD rate + volatility (from `FXRate` table)
+- [ ] Corridor Risk — active port delay flag (from `Shipment` table)
+- [ ] "Buy Now" advisory signal
+
+### 4.4 External Enrichment
+- [ ] FX hedging signal (external API)
+- [ ] Weather / satellite data integration (Season A/B demand signal)
 
 ---
 
-## 🧪 Testing Strategy
+## Phase 5: UX Enhancements
+
+### 5.1 Accessibility (a11y)
+- [ ] axe-core audit
+- [ ] Proper ARIA labels
+- [ ] Keyboard navigation
+- [ ] Screen reader testing (NVDA/JAWS)
+
+### 5.2 Onboarding
+- [ ] First-time user tour
+- [ ] Sample data seeder (demo mode)
+
+### 5.3 Internationalization
+- [ ] English + French translations
+- [ ] Kinyarwanda (optional)
+
+---
+
+## Testing Strategy
 
 ### Unit Tests
 - [x] Zod schema validation (CSV rows)
@@ -254,155 +205,37 @@ Build a production-ready inventory management system for agri-input distributors
 - [ ] API routes
 
 ### End-to-End Tests (Playwright)
-- [ ] User login flow
-- [ ] CSV import flow (happy path)
-- [ ] CSV import flow (error handling)
+- [ ] Login flow
+- [ ] CSV import (happy path + error handling)
 - [ ] Dashboard navigation
 - [ ] Transaction filtering
-- [ ] Product detail modal (role-gated edit)
+- [ ] Role-gated product edit modal
 - [ ] User management (Admin)
 
-### Performance Tests
-- [ ] Load testing (1,000 concurrent users)
-- [ ] Database query benchmarks
-- [ ] CSV import with 10,000 rows
+---
+
+## Progress Log
+
+### 2026-03-22 (Checkpoint 1) — Foundation & Testing Setup
+Vitest, `.env.example`, retry logic, chunked import, route groups, landing page.
+
+### 2026-03-25 (Checkpoint 2) — Dashboard Polish + Transactions Foundation
+KPI corrections, stock table, error boundaries, loading skeletons, transactions page.
+
+### 2026-03-28 (Checkpoint 3) — Role-Gated Modal + Admin User Management
+`ProductDetailModal`, `UsersTable`, full user CRUD server actions, audit log, CSV export, Sale + QuickAdd pages.
+
+### 2026-03-29 (Checkpoint 4) — Phase 1 Audit + Deployment
+Phase 1 confirmed complete. Live on Vercel. `NEXTAUTH_URL` fixed after domain rename. `dev` branch workflow established.
+
+### 2026-04 to 2026-05 (Checkpoint 5) — Dashboard Charts + KPI Upgrade
+Full Recharts integration (Groups A–E). KPI cards replaced with correct business metrics (Turnover Rate, Fulfillment Rate, Lost Sales Value, Capital Lock). Alerts panel. Financial mini cards. Inventory table upgraded (Coverage Days, Fulfillment %, Landed Cost, Margin %). Collapsible sidebar. Dark mode via context + localStorage. Sentry + Upstash rate limiting deployed.
+
+### 2026-06 (Checkpoint 6) — Landing & Login Redesign
+Full landing page redesign (Direction C — deep emerald gradient). Scroll-aware nav. Glassmorphism hero card. Dark ticker. All non-functional UI elements removed. Login page dark mode. localStorage key unified to `agri-dark-mode`.
 
 ---
 
-## 📊 Definition of "Complete"
-
-The project is considered **production-ready** when:
-
-✅ **Functionality**
-- All Phase 1 & 2 features implemented
-- No critical bugs in issue tracker
-- All user flows tested (manual + automated)
-
-✅ **Quality**
-- Test coverage ≥ 70% (unit + integration)
-- All E2E critical paths covered
-- No high/critical accessibility issues
-
-✅ **Performance**
-- Page load time < 2 seconds (Lighthouse)
-- CSV import handles 10,000 rows without timeout
-- Database queries < 100ms (p95)
-
-✅ **Security**
-- OWASP Top 10 vulnerabilities addressed
-- Rate limiting on all public endpoints
-- Audit logs for all mutations
-
-✅ **Documentation**
-- README with setup instructions
-- API documentation for Server Actions
-- User guide (how to use the system)
-- Deployment guide
-
-✅ **Deployment**
-- Deployed to production environment
-- Environment variables secured
-- Database backups configured
-- Monitoring/alerting set up
-
----
-
-## 📅 Progress Log
-
-### 2026-03-22 (Checkpoint 1)
-**Focus:** Foundation & Testing Setup
-
-**Completed:**
-- ✅ Created `.env.example` for environment setup
-- ✅ Added comprehensive `ROADMAP.md`
-- ✅ Set up Vitest testing infrastructure
-- ✅ Wrote 3 CSV validation tests (all passing)
-- ✅ Implemented retry logic for import (3 attempts, exponential backoff)
-- ✅ Improved progress tracking with real-time updates
-- ✅ Refactored to `app/(app)` route group structure
-- ✅ Created landing page with auth-aware UI
-- ✅ Configured middleware for public/protected routes
-
-**Time Invested:** ~2-3 hours  
-**Tests Passing:** 3/3 ✅  
-**Build Status:** ✅ Working  
-**Deployment Status:** Local dev only
-
-### 2026-03-25 (Checkpoint 2)
-**Focus:** Dashboard Polish + Error Handling + Transactions Foundation
-
-**Completed:**
-- ✅ Fixed dashboard KPI calculations (low stock, inventory value)
-- ✅ Built Stock-on-Hand table with search and sorting
-- ✅ Added last import timestamp with refresh button
-- ✅ Implemented error boundaries (error.tsx)
-- ✅ Added loading skeletons (loading.tsx)
-- ✅ Created transactions page with basic table + pagination
-- ✅ Added empty states for better UX
-
-**Time Invested:** ~2 hours  
-**Phase 1 Progress:** ~85% complete  
-**Build Status:** ✅ Working  
-**Deployment Status:** Local dev only
-
-### 2026-03-28 (Checkpoint 3)
-**Focus:** Role-Gated Detail Modal (Task 3) + Admin User Management (Task 4)
-
-**Completed:**
-- ✅ `ProductDetailModal` — click any stock row → modal with full product details
-- ✅ Role-gated editing in modal: MANAGER/ADMIN see edit form, ANALYST sees read-only
-- ✅ `StockOnHandTable` updated — click handler, `userRole` prop, modal mounted inside
-- ✅ `app/lib/actions/admin.ts` — `createUserAction`, `updateUserRoleAction`, `deleteUserAction` with self-protection guards
-- ✅ `app/(app)/admin/(users)/page.tsx` — server component, ADMIN-only guard, clean URL via route group
-- ✅ `UsersTable` — role badges (colour-coded), initials avatar, action buttons disabled on own row
-- ✅ `CreateUserModal` — bcrypt hashing, P2002 duplicate email guard, auto-close on success
-- ✅ `EditRoleModal` — seeds current role on open, live role descriptions, Save disabled if no change
-- ✅ `AdminPageHeader` — client component, dark-mode aware, consistent typography with rest of app
-- ✅ `DangerModal` reused as-is for delete confirmation
-
-**Key patterns learned:**
-- `useTransition` + server actions for non-blocking UI with spinner
-- `null` state as open/closed signal for modals (vs separate boolean)
-- Server components compose client ones — never the reverse
-- `requireAdmin()` shared guard to keep server actions DRY
-- `emailVerified` not set for Credentials-based auth — skip until OAuth is added
-
-**Time Invested:** ~3 hours  
-**Phase 1 Progress:** ✅ 100% complete  
-**Phase 2 Progress:** 2.4 User Management ✅ complete  
-**Build Status:** ✅ Working  
-**Deployment Status:** ✅ Live on Vercel (agrihub-z.vercel.app)
-
-### 2026-03-29 (Checkpoint 4)
-**Focus:** Phase 1 audit + Phase 2 kickoff
-
-**Completed:**
-- ✅ Confirmed Phase 1 is 100% complete 
-- ✅ Confirmed deployment is live and stable
-- ✅ Fixed NEXTAUTH_URL after domain rename to agrihub-z.vercel.app
-- ✅ Updated Roadmap to reflect true project state
-- ✅ Established dev branch workflow (dev → main = dev → production)
-
-**Key patterns learned:**
-- `NEXTAUTH_URL` controls where `signOut()` redirects — must match deployed domain
-- Supabase pooler URL (port 6543) vs direct URL (port 5432) — same host, different ports, both needed
-- `dev` branch for active development, `main` = production
-
-**Time Invested:** ~1 hour  
-**Phase 1 Progress:** ✅ 100% complete  
-**Phase 2 Progress:** 🔧 Starting  
-**Build Status:** ✅ Working  
-**Deployment Status:** ✅ Live on Vercel (agrihub-z.vercel.app)
-
-## 📝 Notes
-
-- Keep updating this roadmap as tasks complete
-- Move completed items to "Completed" section
-- Add new discoveries to "Challenges Solved"
-- Celebrate small wins!
-
----
-
-**Version:** 1.4  
+**Version:** 2.0  
 **Maintainer:** @Zolender  
 **License:** MIT

@@ -1,169 +1,188 @@
-# Rwanda Agri Hub — Inventory Orchestration (Web App)
+# Rwanda AgriHub — Inventory Management System
 
-A web application for Rwanda mid-market agri-input distributors to record, import, and analyze **inventory transactions** (Sales, Purchases, Adjustments) and track **stock-on-hand** over time.
+A production-grade inventory management web app for agri-input distributors in Rwanda. Records and analyzes inventory transactions (Sales, Purchases, Adjustments), tracks stock-on-hand, and surfaces operational KPIs through an interactive dashboard.
 
-> Current scope (for now): **Frontend + Backend only**  
-> Out of scope (for now): ML/AI recommendation engine
-
----
-
-## 1) Problem Context (Why this exists)
-
-Agri-input distributors in Rwanda face frequent stock issues due to:
-- long and variable import lead times (corridor/port/border delays),
-- seasonality (Season A / Season B),
-- pricing volatility (cost changes, landed cost changes).
-
-Many SMEs rely on manual reorder points and spreadsheets. This project starts by building a **reliable system of record** for inventory movements and stock levels.
+**Live:** [agrihub-z.vercel.app](https://agrihub-z.vercel.app)
 
 ---
 
-## 2) What this app will do (v1)
+## What is built
 
-### Core features
-- Import inventory transaction data from a CSV file
-- Store transactions in a database (PostgreSQL)
-- Provide dashboards and tables for:
-  - Stock on hand (latest stock per product)
-  - Transaction history filtered by product / region / time / movement type
-  - Lost sales tracking (stockouts)
+### Authentication & Access Control
+- NextAuth v5 (JWT sessions) with three roles: **ADMIN**, **MANAGER**, **ANALYST**
+- Rate-limited login via Upstash Redis — blocks repeated failed attempts with a visible warning
+- Audit log capturing every mutation: user CRUD, stock edits, sales, and purchases
 
-### Users (Authentication)
-- Multiple users can log in.
-- Roles (initial plan):
-  - **Admin**: manage users, import data
-  - **Manager**: view dashboards and transactions
-  - **Analyst**: view/export reports (optional)
+### Dashboard
+Four KPI cards:
 
----
+| Card | What it measures |
+|------|-----------------|
+| Turnover Rate | `(units_sold_30d / avg_stock_30d) × (365/30)` — annualized |
+| Fulfillment Rate | Percentage of ordered units actually delivered (stored as 0–100) |
+| Lost Sales Value | Value of unmet demand in RWF (last 30 days) |
+| Capital Lock | Current stock × landed cost per unit, in RWF |
 
-## 3) Tech Stack (planned)
+Five chart/section groups:
 
-This repository is TypeScript-first.
+| Group | Content |
+|-------|---------|
+| A — Stock Overview | Stock Status Donut (in-stock / low-stock / stockout breakdown) |
+| B — Velocity | Stock Velocity Scatter (units moved vs. coverage days, per product) |
+| C — Weekly Trend | Stacked area chart — fulfilled vs. ordered units over 12 weeks |
+| D — Alerts | Reorder alerts (stock below reorder point) + Shipment delays (POs open > 2 days). Financial mini cards (margin, capital lock) |
+| E — Trends | Sales by Region Bar (grouped, top 5 regions, 12 weeks) · Lost Sales Trend (ComposedChart — bars + line, dual Y-axis) |
 
-- Frontend: **Next.js (TypeScript)** + React
-- Backend: **Next.js Route Handlers** (API inside the same app)
-- Database: **PostgreSQL**
-- ORM: **Prisma**
-- Validation: **Zod**
-- UI: (TBD) Tailwind CSS and later on GSAP for animation
-- Testing: (later) Playwright + Vitest
+### Inventory Page
+Full stock-on-hand table with columns: Product ID, Category, Stock Level, Coverage Days, Fulfillment %, Reorder Point, Status, Landed Cost (RWF), Margin %. Click any row to open a detail modal; MANAGER/ADMIN see an edit form, ANALYST sees read-only.
 
----
+### Transactions Page
+Paginated transaction history with filters: date range, movement type (Sale / Purchase / Adjustment), region, and product search. CSV export (filter-aware, 10 k row limit).
 
-## 4) Data Contract (CSV format)
+### Import
+CSV import with client-side chunking (handles 2,000+ rows), Zod row validation, per-row retry logic, partial success UI, and error report download.
 
-### 4.1 CSV header (expected columns)
-
-The CSV must include the following columns:
-
-- `product_id`
-- `category_id`
-- `unit_of_measure`
-- `unit_cost_rwf`
-- `selling_price_rwf`
-- `reorder_point_units`
-- `lead_time_buffer_days`
-- `movement_type` — allowed: `Sale`, `Purchase`, `Adjustment`
-- `quantity_ordered_units`
-- `quantity_fulfilled_units`
-- `remaining_stock_units`
-- `order_id`
-- `customer_id`
-- `region`
-- `lost_sale_qty_units`
-- `po_id`
-- `supplier_id`
-- `transaction_date`
-- `landed_cost_rwf`
-
-> Note: `product_status` is intentionally **not** part of the v1 model, because it is redundant (it was always “available” or “sold” in the source CSV).  
-> If the CSV includes it, we may ignore it during import.
-
-### 4.2 Key definitions (important)
-
-#### Inventory transaction (row)
-Each row represents a single **inventory movement event** at a specific time.
-
-#### `movement_type`
-- `Sale`: inventory decreases due to customer demand
-- `Purchase`: inventory increases due to restocking
-- `Adjustment`: inventory changes due to corrections, losses, breakage, etc.
-
-#### `remaining_stock_units`
-**This is the stock level AFTER the transaction**.
-
-Example:
-- If `movement_type = Sale` and `quantity_fulfilled_units = 31`
-- and `remaining_stock_units = 2607`
-- then stock before sale was `2638`.
-
-#### `quantity_ordered_units` vs `quantity_fulfilled_units`
-- `quantity_ordered_units`: what was requested by the market/customer (demand)
-- `quantity_fulfilled_units`: what was actually delivered (supply fulfilled)
-
-#### `lost_sale_qty_units`
-A stockout indicator. Usually:
-`lost_sale_qty_units = quantity_ordered_units - quantity_fulfilled_units` (when positive).
-
-#### `order_id`
-Currently unique per row due to the way the CSV was generated.
-Future improvement: support orders containing multiple SKUs.
-
-#### `po_id` / `supplier_id` on sales
-In this dataset, `po_id` and `supplier_id` may appear even on sale rows (likely as batch/procurement lineage). The app will store them as provided.
-
-#### `transaction_date` timezone
-Unless otherwise specified, `transaction_date` values are interpreted as **Rwanda time (UTC+2)**.
+### Admin
+User management (ADMIN only): create users, change roles, delete users with self-protection guards. Audit log viewer at `/admin/audit`.
 
 ---
 
-## 5) Data Quality Rules (import validation)
+## Tech Stack
 
-On CSV import, we will validate:
-- `movement_type` is one of: `Sale`, `Purchase`, `Adjustment`
-- numeric columns parse correctly (RWF costs/prices, quantities)
-- `transaction_date` parses correctly and is stored as a timestamp
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16 (App Router, React 19) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Animation | Framer Motion |
+| Charts | Recharts 3 |
+| Database | PostgreSQL (Supabase) |
+| ORM | Prisma 7 (PrismaPg driver adapter) |
+| Auth | NextAuth v5 (JWT, Credentials provider) |
+| Rate Limiting | Upstash Redis |
+| Error Tracking | Sentry |
+| Validation | Zod |
+| Testing | Vitest |
+| Deployment | Vercel |
+
+---
+
+## Routes
+
+| Path | Access | Description |
+|------|--------|-------------|
+| `/` | Public | Animated landing page |
+| `/login` | Public | Login with rate limiting |
+| `/dashboard` | All roles | KPI cards + charts + alerts |
+| `/inventory` | All roles | Stock-on-hand table |
+| `/transactions` | All roles | Transaction history + CSV export |
+| `/import` | ADMIN / MANAGER | CSV import |
+| `/sale` | ADMIN / MANAGER | Record a sale |
+| `/quick-add` | ADMIN / MANAGER | Receive stock (purchase) |
+| `/admin/users` | ADMIN | User management |
+| `/admin/audit` | ADMIN | Audit log |
+| `/api/health` | Public | Health check endpoint |
+| `/api/transactions/export` | Authenticated | Filter-aware CSV export |
+
+---
+
+## Data Contract (CSV format)
+
+### Required columns
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `product_id` | string | SKU — unique product code |
+| `category_id` | string | |
+| `unit_of_measure` | string | |
+| `unit_cost_rwf` | number | Purchase cost per unit |
+| `selling_price_rwf` | number | |
+| `reorder_point_units` | number | Manual reorder threshold |
+| `lead_time_buffer_days` | number | |
+| `movement_type` | enum | `Sale` / `Purchase` / `Adjustment` |
+| `quantity_ordered_units` | number | Demand — what was requested |
+| `quantity_fulfilled_units` | number | Supply met — what was delivered |
+| `remaining_stock_units` | number | Stock AFTER this transaction |
+| `order_id` | string | Currently unique per row |
+| `customer_id` | string | |
+| `region` | string | e.g. `Musanze`, `Nyagatare` |
+| `lost_sale_qty_units` | number | `ordered − fulfilled` when positive |
+| `po_id` | string | May appear on sale rows (batch lineage) |
+| `supplier_id` | string | |
+| `transaction_date` | date | Interpreted as Rwanda time (UTC+2) |
+| `landed_cost_rwf` | number | Unit cost including 30% logistics surcharge |
+
+### Key definitions
+
+**`remaining_stock_units`** — stock level *after* the transaction (snapshot model).
+
+**`quantity_ordered_units` vs `quantity_fulfilled_units`** — ordered reflects demand; fulfilled reflects supply actually met.
+
+**`lost_sale_qty_units`** — `quantity_ordered_units − quantity_fulfilled_units` when positive; zero for fully fulfilled rows.
+
+**`order_id`** — currently one SKU per order (unique per row). Multi-SKU orders are a future improvement.
+
+**`transaction_date`** — interpreted as Rwanda time (UTC+2) unless otherwise specified.
+
+---
+
+## Import Validation Rules
+
+- `movement_type` must be `Sale`, `Purchase`, or `Adjustment`
+- Numeric columns must parse correctly (RWF costs, quantities)
+- `transaction_date` must parse to a valid timestamp
 - `remaining_stock_units >= 0`
-- for `Sale`:
-  - `quantity_fulfilled_units <= quantity_ordered_units` (when ordered exists)
-  - `lost_sale_qty_units >= 0`
+- For `Sale` rows: `quantity_fulfilled_units <= quantity_ordered_units`; `lost_sale_qty_units >= 0`
 
-Invalid rows should be reported back to the user with clear error messages.
+Invalid rows are reported back to the user with row-level error messages. Valid rows are committed even if some rows fail (partial success).
 
 ---
 
-## 6) Roadmap (step-by-step)
+## KPI Formulas
 
-### Phase 1 — System of Record
-- Database schema
-- CSV import API
-- Transactions table view + filters
-- Stock-on-hand dashboard
+| KPI | Formula | Notes |
+|-----|---------|-------|
+| Turnover Rate | `(units_sold_30d / avg_stock_30d) × (365 / 30)` | Annualized |
+| Fulfillment Rate | `sum(qty_fulfilled) / sum(qty_ordered) × 100` | Stored as 0–100, not 0–1 |
+| Lost Sales Value | `sum(lost_sale_qty × selling_price_rwf)` | Last 30 days |
+| Capital Lock | `sum(remaining_stock × landed_cost_rwf)` | Current snapshot |
+| Coverage Days | `remaining_stock / (units_sold_30d / 30)` | Per product |
+| Shipment Delay Threshold | PO open > 2 days | Triggers delay alert |
 
-### Phase 2 — Operational UX
-- User authentication + roles
-- Audit logs (who imported what, when)
-- Basic exports (CSV download)
-
-### Phase 3 — Enhancements (non-AI)
-- Multi-SKU orders (true order + order line items)
-- Better supplier/customer views
-- Charts and trends
+> `fulfillmentRatio` is stored as a **percentage (0–100)**, not a decimal ratio (0–1). Divide by 100 before using it as a multiplier.
 
 ---
 
-## 7) Project Glossary (quick definitions)
+## Local Development
 
-- **SKU (`product_id`)**: a unique code for a product.
-- **Inventory ledger**: a chronological log of inventory movements.
-- **Normalize (database)**: store data in separate tables to reduce duplication.
-- **Data contract**: agreed meaning of each column and its rules.
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Copy and fill environment variables
+cp .env.example .env.local
+# Required: DATABASE_URL, DIRECT_URL, AUTH_SECRET,
+#           UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
+
+# 3. Run database migrations and generate the Prisma client
+npx prisma migrate dev
+npx prisma generate
+
+# 4. Seed the database (creates the first Admin user)
+npx tsx prisma/seed.ts
+
+# 5. Start the dev server
+npm run dev
+```
 
 ---
 
-## 8) Next steps
+## Glossary
 
-1) Implement Prisma schema + migrations
-2) Implement `/api/import/csv`
-3) Implement the initial dashboard pages
+- **SKU (`product_id`)**: unique code identifying a product
+- **Inventory ledger**: chronological log of stock movements — the source of truth
+- **fulfillmentRatio**: stored as a percentage (0–100), not a decimal ratio (0–1)
+- **Coverage Days**: how many days of stock remain at the current run rate
+- **Capital Lock**: cash tied up in unsold inventory, valued at landed cost
+- **Corridor / Port Delay**: actual lead time exceeds `lead_time_buffer_days` — surfaces in the alerts panel
+- **Season A / Season B**: Rwanda's two main agricultural seasons — the primary demand drivers

@@ -204,3 +204,29 @@ Solution:
     + `page.tsx` — server component: handles auth check + DB fetch, passes data as props.
     + `AuditLogTable.tsx` — client component (`"use client"`): receives data as props, calls `useDarkMode()`, renders the UI.
 * Key rule: Server components fetch data. Client components handle interactivity and browser APIs. They compose — server renders client, never the other way.
+
+## 24. Recharts Cannot Be Server-Side Rendered
+
+* Challenge: Adding a Recharts chart component to a dashboard page caused a build crash: `SyntaxError: Cannot use import statement in a module`. Recharts (and most charting libraries) use browser-only APIs (`window`, `ResizeObserver`) that do not exist in Node during server rendering.
+* Why it happened: The dashboard `page.tsx` is a Server Component. Importing a Recharts component directly means Next.js tries to render it on the server, where the browser APIs it depends on are absent.
+* Solution:
+  + Created `ChartClientWrappers.tsx` — a single client component file (`"use client"`) that re-exports every chart component wrapped with `next/dynamic` and `ssr: false`.
+  + Imported charts only from `ChartClientWrappers.tsx`, never directly.
+* Key rule: Any third-party component that touches `window`, `document`, or DOM APIs at import time needs `next/dynamic` with `ssr: false`. Centralizing those wrappers in one file (`ChartClientWrappers.tsx`) keeps the pattern DRY.
+
+## 25. Dark Mode via Tailwind `dark:` vs. React Context
+
+* Challenge: Adding `dark:` Tailwind classes to dashboard components had no effect — toggling the sidebar dark mode button changed the icon but nothing else responded.
+* Why it happened: Tailwind's `dark:` prefix works by watching for a `dark` class on the `<html>` element (or `prefers-color-scheme` media query). The app's dark mode toggle writes to React state (`DarkModeContext`) and `localStorage` — it does NOT add a class to `<html>`. So `dark:` classes are permanently inactive.
+* Solution: Removed all `dark:` class usage from dashboard components. All dark/light variants are expressed as inline conditionals: `isDark ? 'bg-stone-900' : 'bg-white'`. The `useDarkMode()` hook from `DarkModeContext` provides the boolean.
+* Key rule: In this codebase, dark mode is state-driven, not class-driven. Never use Tailwind `dark:` prefix. Always use `isDark ? '...' : '...'` conditionals.
+
+## 26. Public Pages Cannot Use the Dashboard's DarkModeContext
+
+* Challenge: The landing page and login page ignored the dark mode toggle — clicking it had no effect on those pages.
+* Why it happened: `DarkModeContext` is provided inside the `(app)` layout, which wraps only the authenticated dashboard routes. The public pages (`/` and `/login`) live in the `(public)` route group, which has its own layout with no context provider. Calling `useDarkMode()` on a public page would throw or return stale values.
+* Solution:
+  + Public pages read and write `localStorage` directly, using the same key: `agri-dark-mode`.
+  + An `addEventListener('storage', ...)` listener keeps the login page in sync when the key changes in another tab.
+  + The key was also unified (was `'darkMode'` on the old landing page) so toggling from one page carries over consistently.
+* Key rule: Context providers do not cross route group layout boundaries. Public pages that need `localStorage`-persisted state must manage it themselves using the same key as the rest of the app.

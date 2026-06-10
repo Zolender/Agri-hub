@@ -1,5 +1,6 @@
 # Agri-Hub — Architecture & Design Notes
 > **Source:** GitHub Copilot discussion session — 2026-05-24  
+> **Last reviewed:** 2026-06-10  
 > **Author:** @Zolender  
 > **Purpose:** Reference document covering ML feasibility, key metrics, dashboard design, and the full inventory process description.
 
@@ -79,19 +80,22 @@ Phase 6 — FX hedging signal + weather/satellite integration
 | **Supplier Reliability Score** | `% of POs delivered on-time per supplier_id` | Data-driven ranking of suppliers (e.g. ETG Rwanda vs. Agrotech) |
 | **Reorder Point Accuracy** | `% of manual reorderPoints that prevented stockouts` | The Back-Cast metric — validates or disproves current manual thresholds |
 
-### ⚠️ Known Bug to Fix
-> `DashboardPage` currently computes **Inventory Value** using `unitCostRwf`.  
-> It should use **`landedCostRwf`** (includes the 30% logistics surcharge).  
-> This is understating the real capital exposure. Fix this in `app/(app)/dashboard/page.tsx`.
+### ✅ Bug Fixed
+> Capital Lock now correctly uses `landedCostRwf` (includes the 30% logistics surcharge).  
+> The old "Inventory Value" card has been replaced with "Capital Lock (RWF)" in `app/(app)/dashboard/page.tsx`.
 
 ---
 
 ## 3. Dashboard — Target Composition vs. Current State
 
-### What exists today
-- ✅ 4 KPI cards: Total Products, Low Stock Alerts, Inventory Value, Total Movements
-- ✅ Stock-on-Hand table (searchable, sortable, click-to-modal with role-gated edit)
-- ✅ Last import timestamp
+### What exists today (as of 2026-06-10)
+- ✅ 4 KPI cards: Turnover Rate, Fulfillment Rate (%), Lost Sales Value (RWF), Capital Lock (RWF)
+- ✅ Section 1 charts: Stock Status Donut, Stock Velocity Scatter
+- ✅ Section 2: Weekly Trend chart (stacked area — fulfilled vs. ordered, 12 weeks)
+- ✅ Section 3: Alerts Panel (reorder alerts + shipment delays) + Financial Mini Cards
+- ✅ Section 4: Sales by Region Bar (grouped, top 5 regions) · Lost Sales Trend (ComposedChart)
+- ✅ Stock-on-Hand table (Coverage Days, Fulfillment %, Landed Cost, Margin %, click-to-modal)
+- ✅ Dark mode throughout dashboard (DarkModeContext + localStorage)
 
 ### Target dashboard layout (full vision)
 
@@ -209,16 +213,20 @@ Phase 6 — FX hedging signal + weather/satellite integration
 
 ---
 
-## 5. Immediate Action Items (Quick Wins)
+## 5. Action Items
 
-- [ ] Fix `landedCostRwf` vs `unitCostRwf` in `dashboard/page.tsx` Capital Lock calculation
-- [ ] Add **Stock Coverage Days** column to `StockOnHandTable`
-- [ ] Add **Fulfillment Rate** as a KPI card on the dashboard
-- [ ] Add **Lost Sales Value (RWF)** as a KPI card
-- [ ] Replace Inventory Value card with **Capital Lock (RWF)** using correct cost field
-- [ ] Add charts (Recharts) for stock trends and sales by region (Phase 3.3 in Roadmap)
-- [ ] Build the **Back-Cast Engine** as a pure SQL/Prisma analytical page before touching ML
-- [ ] Start populating `Shipment` and `FXRate` rows during Purchase imports for future ML readiness
+### Completed
+- [x] Fix `landedCostRwf` vs `unitCostRwf` in Capital Lock calculation
+- [x] Add **Stock Coverage Days** column to `StockOnHandTable`
+- [x] Add **Fulfillment Rate** as a KPI card
+- [x] Add **Lost Sales Value (RWF)** as a KPI card
+- [x] Replace Inventory Value card with **Capital Lock (RWF)**
+- [x] Add Recharts charts for stock trends and sales by region (Groups A–E complete)
+
+### Remaining
+- [ ] Build the **Back-Cast Engine** — pure SQL: did `reorderPointUnits` actually prevent stockouts?
+- [ ] Group F charts: Shrinkage Rate, Supplier Reliability, Lead-Time Deviation
+- [ ] Start populating `Shipment` and `FXRate` rows during Purchase imports (ML readiness)
 
 ---
 
