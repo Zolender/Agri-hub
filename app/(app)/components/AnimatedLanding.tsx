@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { TrendingUp, Shield, Zap, BarChart3, FileUp, CheckCircle2, ArrowRight, ArrowUpRight, Leaf, Globe, ChevronRight, Package, Star, Play, X, Moon, Sun } from 'lucide-react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { TrendingUp, Shield, BarChart3, FileUp, CheckCircle2, ArrowRight, ArrowUpRight, Leaf, Globe, Package, Moon, Sun } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 
 type AnimatedLandingProps = {
@@ -107,7 +107,7 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
 
     // Load dark mode preference from localStorage
     useEffect(() => {
-        const saved = localStorage.getItem('darkMode');
+        const saved = localStorage.getItem('agri-dark-mode');
         if (saved !== null) {
             setIsDark(saved === 'true');
         }
@@ -117,7 +117,7 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
     const toggleDarkMode = () => {
         const newMode = !isDark;
         setIsDark(newMode);
-        localStorage.setItem('darkMode', String(newMode));
+        localStorage.setItem('agri-dark-mode', String(newMode));
     };
 
     return (
@@ -243,24 +243,14 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
                                 className="flex flex-wrap gap-3"
                             >
                                 {!session ? (
-                                    <>
-                                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                                            <Link
-                                                href="/login"
-                                                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20"
-                                            >
-                                                Get Started <ArrowRight className="w-4 h-4" />
-                                            </Link>
-                                        </motion.div>
-                                        <motion.button
-                                            whileHover={{ scale: 1.03 }}
-                                            whileTap={{ scale: 0.97 }}
-                                            className={`inline-flex items-center gap-2 px-6 py-3 border ${isDark ? 'border-stone-700 text-stone-300 hover:border-stone-600 hover:text-stone-200 bg-stone-900' : 'border-stone-300 text-stone-700 hover:border-stone-400 hover:text-stone-900 bg-white'} rounded-xl font-semibold text-sm transition-colors`}
+                                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                        <Link
+                                            href="/login"
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20"
                                         >
-                                            <Play className="w-4 h-4" />
-                                            Watch Demo
-                                        </motion.button>
-                                    </>
+                                            Get Started <ArrowRight className="w-4 h-4" />
+                                        </Link>
+                                    </motion.div>
                                 ) : (
                                     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                                         <Link
@@ -274,80 +264,70 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
                             </motion.div>
                         </div>
 
-                        {/* Right — floating stat cards (Desktop) */}
+                        {/* Right — Dashboard preview card (Desktop) */}
                         <motion.div
                             initial={{ opacity: 0, x: 32 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.45, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                            className="hidden lg:block pb-12 space-y-3 w-64"
+                            className="hidden lg:block pb-12 w-64"
                         >
                             <motion.div
-                                animate={{ y: [0, -7, 0] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                className={`${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} border rounded-2xl p-5 shadow-xl`}
+                                animate={{ y: [0, -6, 0] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                                className={`${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} border rounded-2xl p-5 shadow-xl space-y-4`}
                             >
-                                <div className="flex items-start justify-between mb-3">
-                                    <span className={`text-[11px] ${isDark ? 'text-stone-500' : 'text-stone-400'} uppercase tracking-wider`}>Total SKUs</span>
-                                    <div className="w-6 h-6 rounded-full bg-emerald-600/10 grid place-items-center">
-                                        <Package className="w-3 h-3 text-emerald-600" />
+                                <div className={`text-[10px] font-mono uppercase tracking-widest ${isDark ? 'text-stone-500' : 'text-stone-400'}`}>
+                                    Dashboard preview
+                                </div>
+
+                                {[
+                                    { label: 'Fulfillment Rate', value: '94%', color: 'text-emerald-600' },
+                                    { label: 'Low Stock Items',  value: '12',  color: 'text-amber-500'  },
+                                    { label: 'Stockouts',        value: '3',   color: 'text-rose-500'   },
+                                ].map(({ label, value, color }) => (
+                                    <div key={label} className="flex items-center justify-between">
+                                        <span className={`text-xs ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>{label}</span>
+                                        <span className={`text-sm font-bold tabular-nums ${color}`}>{value}</span>
                                     </div>
-                                </div>
-                                <div className={`text-3xl font-black ${isDark ? 'text-stone-100' : 'text-stone-900'} tracking-tighter`}>
-                                    <Counter target={2847} />
-                                </div>
-                                <div className="mt-2 flex items-center gap-1 text-xs text-emerald-600">
-                                    <TrendingUp className="w-3 h-3" />
-                                    +12% this month
-                                </div>
-                            </motion.div>
+                                ))}
 
-                            <motion.div
-                                animate={{ y: [0, -5, 0] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
-                                className="bg-emerald-600 rounded-2xl p-5 shadow-xl shadow-emerald-600/20"
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <span className="text-[11px] text-emerald-100 uppercase tracking-wider font-medium">Stock Value</span>
-                                    <Zap className="w-4 h-4 text-emerald-100" />
-                                </div>
-                                <div className="text-2xl font-black text-white tracking-tight">RWF 48.2M</div>
-                                <div className="mt-2 text-xs text-emerald-200">Across 3 regions</div>
-                            </motion.div>
-
-                            <motion.div
-                                animate={{ y: [0, -8, 0] }}
-                                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
-                                className={`${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} border rounded-2xl p-5 shadow-xl`}
-                            >
-                                <div className={`text-[11px] ${isDark ? 'text-stone-500' : 'text-stone-400'} uppercase tracking-wider mb-3`}>Low Stock Alerts</div>
-                                <div className="space-y-2">
-                                    {['NPK 50kg', 'DAP Fertilizer', 'Urea 25kg'].map((item, i) => (
-                                        <div key={i} className="flex items-center justify-between">
-                                            <span className={`text-xs ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>{item}</span>
-                                            <span className="text-[10px] bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2 py-0.5 rounded-full">Low</span>
-                                        </div>
-                                    ))}
+                                <div className={`border-t ${isDark ? 'border-stone-800' : 'border-stone-100'} pt-3 space-y-2`}>
+                                    <div className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-stone-600' : 'text-stone-400'}`}>Weekly trend</div>
+                                    <div className="flex items-end gap-1.5 h-10">
+                                        {[58, 72, 65, 88, 79, 94, 82].map((h, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ height: 0 }}
+                                                animate={{ height: `${h}%` }}
+                                                transition={{ delay: 0.6 + i * 0.07, duration: 0.4, ease: 'easeOut' }}
+                                                className="flex-1 bg-emerald-600/70 rounded-sm"
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             </motion.div>
                         </motion.div>
                     </div>
 
-                    {/* Mobile Floating Cards (NEW!) */}
+                    {/* Mobile Dashboard Preview */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8, duration: 0.6 }}
-                        className="lg:hidden grid grid-cols-2 gap-3 mt-12"
+                        className="lg:hidden mt-10"
                     >
-                        <div className={`${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} border rounded-xl p-4 shadow-lg`}>
-                            <div className={`text-2xl font-black ${isDark ? 'text-stone-100' : 'text-stone-900'} tracking-tight`}>
-                                <Counter target={2847} />
-                            </div>
-                            <div className={`text-[10px] ${isDark ? 'text-stone-500' : 'text-stone-400'} uppercase tracking-wider mt-1`}>Products</div>
-                        </div>
-                        <div className="bg-emerald-600 rounded-xl p-4 shadow-lg shadow-emerald-600/20">
-                            <div className="text-xl font-black text-white tracking-tight">48.2M</div>
-                            <div className="text-[10px] text-emerald-200 uppercase tracking-wider mt-1">RWF Value</div>
+                        <div className={`text-[9px] font-mono uppercase tracking-widest ${isDark ? 'text-stone-600' : 'text-stone-400'} mb-3`}>Dashboard preview</div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[
+                                { label: 'Fulfillment', value: '94%', color: 'text-emerald-600' },
+                                { label: 'Low Stock',   value: '12',  color: 'text-amber-500'  },
+                                { label: 'Stockouts',   value: '3',   color: 'text-rose-500'   },
+                            ].map(({ label, value, color }) => (
+                                <div key={label} className={`${isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'} border rounded-xl p-3 text-center`}>
+                                    <div className={`text-lg font-black tabular-nums ${color}`}>{value}</div>
+                                    <div className={`${isDark ? 'text-stone-500' : 'text-stone-400'} text-[10px] mt-0.5`}>{label}</div>
+                                </div>
+                            ))}
                         </div>
                     </motion.div>
 
@@ -358,7 +338,7 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
                         transition={{ delay: 0.9, duration: 0.6 }}
                         className={`border-t ${isDark ? 'border-stone-800' : 'border-stone-200'} pt-8 pb-16 flex flex-wrap items-center gap-8 text-xs ${isDark ? 'text-stone-500' : 'text-stone-400'}`}
                     >
-                        {['No setup fees', 'Works offline-ready', '3 user roles', 'Export anytime'].map((item, i) => (
+                        {['No setup fees', '3 user roles', 'Export anytime'].map((item, i) => (
                             <span key={i} className="flex items-center gap-2">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                 {item}
@@ -372,10 +352,10 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
             <section className={`border-y ${isDark ? 'border-stone-800 bg-stone-900' : 'border-stone-200 bg-white'}`}>
                 <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
                     {[
-                        { n: 2000, suf: '+',   label: 'Products tracked' },
-                        { n: 3,    suf: '',    label: 'Permission tiers' },
-                        { n: 100,  suf: '%',   label: 'Real-time updates' },
-                        { n: 48,   suf: 'hrs', label: 'To get set up' },
+                        { n: 3,    suf: '',  label: 'User roles' },
+                        { n: 2000, suf: '+', label: 'Rows per import' },
+                        { n: 12,   suf: '',  label: 'Weeks of trend data' },
+                        { n: 100,  suf: '%', label: 'Import validation' },
                     ].map((s, i) => (
                         <motion.div
                             key={i}
@@ -447,14 +427,6 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
                             <h3 className={`text-sm font-bold ${isDark ? 'text-stone-100' : 'text-stone-900'} mb-2`}>{f.title}</h3>
                             <p className={`text-sm ${isDark ? 'text-stone-400' : 'text-stone-500'} leading-relaxed`}>{f.description}</p>
 
-                            <motion.div
-                                initial={{ opacity: 0, x: -4 }}
-                                animate={{ opacity: hoveredFeature === i ? 1 : 0, x: hoveredFeature === i ? 0 : -4 }}
-                                transition={{ duration: 0.2 }}
-                                className="mt-5 flex items-center gap-1 text-xs text-emerald-600 font-medium"
-                            >
-                                Learn more <ChevronRight className="w-3 h-3" />
-                            </motion.div>
                         </motion.div>
                     ))}
                 </div>
@@ -532,7 +504,7 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
                             Optimize your supply chain today.
                         </h2>
                         <p className="text-sm text-emerald-100 mb-10 max-w-md leading-relaxed">
-                            Join agricultural distributors across Rwanda who use AgriHub to keep inventory accurate, current, and accessible.
+                            Track every stock movement, surface low stock before it becomes a stockout, and give your team the right level of access — no spreadsheets required.
                         </p>
 
                         {!session ? (
