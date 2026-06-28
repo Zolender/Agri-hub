@@ -44,6 +44,12 @@ export async function importInventoryAction(data: any[]){
                             }
                         })
 
+                        const existingTransaction = await tx.transaction.findFirst({
+                            where: { orderId: row.order_id, productId: row.product_id },
+                            select: { id: true },
+                        });
+                        if (existingTransaction) return { product, transaction: existingTransaction };
+
                         const transaction = await tx.transaction.create({
                             data: {
                                 productId: row.product_id,
