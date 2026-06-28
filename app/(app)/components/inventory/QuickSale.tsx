@@ -10,6 +10,7 @@ export default function QuickSale() {
     const [sku, setSku] = useState('');
     const [product, setProduct] = useState<any>(null);
     const [qty, setQty] = useState(1);
+    const [region, setRegion] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -28,11 +29,12 @@ export default function QuickSale() {
     const handleSale = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const res = await recordSaleAction(sku, qty, "Kigali Hub");
+        const res = await recordSaleAction(sku, qty, region);
         if (res.success) {
             toast.success("Sale recorded!");
             setSku('');
             setQty(1);
+            setRegion('');
         } else {
             toast.error(res.error);
         }
@@ -89,8 +91,23 @@ export default function QuickSale() {
                     }`}
                 />
 
+                <select
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className={`w-full p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-emerald-500 ${
+                        isDark
+                            ? 'bg-stone-800 text-stone-100'
+                            : 'bg-slate-50 text-slate-700'
+                    }`}
+                >
+                    <option value="">Select region...</option>
+                    {['Kigali', 'Musanze', 'Nyagatare', 'Huye', 'Rubavu', 'Rwamagana', 'Muhanga', 'Karongi'].map(r => (
+                        <option key={r} value={r}>{r}</option>
+                    ))}
+                </select>
+
                 <button
-                    disabled={loading || !product}
+                    disabled={loading || !product || !region}
                     className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium disabled:opacity-30 hover:bg-slate-800 transition-colors"
                 >
                     {loading ? "Processing..." : "Confirm Transaction"}
