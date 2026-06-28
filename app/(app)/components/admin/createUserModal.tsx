@@ -149,6 +149,7 @@ export default function CreateUserModal({ isOpen, onClose }: CreateUserModalProp
                             </div>
                             <button
                                 onClick={handleClose}
+                                aria-label="Close dialog"
                                 className={`p-1.5 rounded-lg transition-colors ${
                                     isDark
                                         ? "hover:bg-stone-800 text-stone-400"
