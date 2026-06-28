@@ -125,7 +125,22 @@ export async function recordPurchaseAction(
     productId: string,
     quantityReceived: number,
     region: string,
-    supplierId?: string
+    options?: {
+        supplierId?: string;
+        poId?: string;
+        transactionDate?: string;
+        shipment?: {
+            shipType?: string;
+            portName?: string;
+            country?: string;
+            arrivalTime?: string;
+            departureTime?: string;
+        };
+        fxRate?: {
+            usdToRwf?: number;
+            eurToRwf?: number;
+        };
+    }
 ) {
     const session = await auth();
 
@@ -135,6 +150,10 @@ export async function recordPurchaseAction(
     ) {
         return { success: false, error: "Only Managers and Admins can receive stock." };
     }
+
+    const supplierId = options?.supplierId || null;
+    const poId = options?.poId || null;
+    const transactionDate = options?.transactionDate ? new Date(options.transactionDate) : new Date();
 
     try {
         await prisma.$transaction(async (tx) => {
@@ -146,18 +165,42 @@ export async function recordPurchaseAction(
                 data: { quantity: { increment: quantityReceived } },
             });
 
-            await tx.transaction.create({
+            const transaction = await tx.transaction.create({
                 data: {
                     productId,
                     movementType: "Purchase",
                     remainingStockUnits: updated.quantity,
                     quantityOrderedUnits: quantityReceived,
                     region,
-                    supplierId: supplierId || null,
+                    supplierId,
+                    poId,
                     orderId: `PO-${Date.now()}`,
-                    transactionDate: new Date(),
+                    transactionDate,
                 },
             });
+
+            if (options?.shipment && (options.shipment.shipType || options.shipment.portName || options.shipment.country)) {
+                await tx.shipment.create({
+                    data: {
+                        transactionId: transaction.id,
+                        shipType: options.shipment.shipType || null,
+                        portName: options.shipment.portName || null,
+                        country: options.shipment.country || null,
+                        arrivalTime: options.shipment.arrivalTime ? new Date(options.shipment.arrivalTime) : null,
+                        departureTime: options.shipment.departureTime ? new Date(options.shipment.departureTime) : null,
+                    },
+                });
+            }
+
+            if (options?.fxRate && (options.fxRate.usdToRwf || options.fxRate.eurToRwf)) {
+                await tx.fXRate.create({
+                    data: {
+                        transactionId: transaction.id,
+                        usdToRwf: options.fxRate.usdToRwf || null,
+                        eurToRwf: options.fxRate.eurToRwf || null,
+                    },
+                });
+            }
         });
 
         await logAction({
@@ -167,7 +210,7 @@ export async function recordPurchaseAction(
             action:     AuditAction.RECORD_PURCHASE,
             targetId:   productId,
             targetType: "Product",
-            detail:     `Received ${quantityReceived} units of ${productId} in ${region}`,
+            detail:     `Received ${quantityReceived} units of ${productId} in ${region}${poId ? ` (PO: ${poId})` : ''}`,
         });
 
         revalidatePath("/dashboard");

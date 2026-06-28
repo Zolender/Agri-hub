@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getProductPreview, recordPurchaseAction } from '@/app/lib/actions/inventory';
 import { toast } from 'sonner';
 import { useDarkMode } from '../DarkModeContext';
-import { PackagePlus, Loader2 } from 'lucide-react';
+import { PackagePlus, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function QuickAdd() {
     const { isDark } = useDarkMode();
@@ -15,6 +15,18 @@ export default function QuickAdd() {
     const [qty, setQty] = useState(1);
     const [region, setRegion] = useState('');
     const [supplierId, setSupplierId] = useState('');
+    const [poId, setPoId] = useState('');
+    const [transactionDate, setTransactionDate] = useState(new Date().toISOString().slice(0, 10));
+    // Shipment fields
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [shipType, setShipType] = useState('');
+    const [portName, setPortName] = useState('');
+    const [country, setCountry] = useState('');
+    const [arrivalTime, setArrivalTime] = useState('');
+    const [departureTime, setDepartureTime] = useState('');
+    // FX fields
+    const [usdToRwf, setUsdToRwf] = useState('');
+    const [eurToRwf, setEurToRwf] = useState('');
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
 
@@ -55,21 +67,40 @@ export default function QuickAdd() {
         }
 
         setLoading(true);
-        const res = await recordPurchaseAction(
-            productId,
-            qty,
-            region.trim(),
-            supplierId.trim() || undefined
-        );
+        const res = await recordPurchaseAction(productId, qty, region, {
+            supplierId: supplierId.trim() || undefined,
+            poId: poId.trim() || undefined,
+            transactionDate,
+            shipment: showAdvanced ? {
+                shipType: shipType || undefined,
+                portName: portName.trim() || undefined,
+                country: country.trim() || undefined,
+                arrivalTime: arrivalTime || undefined,
+                departureTime: departureTime || undefined,
+            } : undefined,
+            fxRate: showAdvanced && (usdToRwf || eurToRwf) ? {
+                usdToRwf: usdToRwf ? Number(usdToRwf) : undefined,
+                eurToRwf: eurToRwf ? Number(eurToRwf) : undefined,
+            } : undefined,
+        });
 
         if (res.success) {
             toast.success(`Stock received! +${qty} units added to ${productId}.`);
-            // Reset form
             setProductId('');
             setProduct(null);
             setQty(1);
             setRegion('');
             setSupplierId('');
+            setPoId('');
+            setTransactionDate(new Date().toISOString().slice(0, 10));
+            setShipType('');
+            setPortName('');
+            setCountry('');
+            setArrivalTime('');
+            setDepartureTime('');
+            setUsdToRwf('');
+            setEurToRwf('');
+            setShowAdvanced(false);
         } else {
             toast.error(res.error ?? 'Something went wrong.');
         }
@@ -189,12 +220,34 @@ export default function QuickAdd() {
                     }`}>
                         Region *
                     </label>
-                    <input
-                        type="text"
-                        placeholder="e.g. Kigali, Musanze, Huye…"
+                    <select
                         value={region}
                         onChange={(e) => setRegion(e.target.value)}
                         className={inputClass}
+                    >
+                        <option value="">Select region...</option>
+                        {['Kigali', 'Musanze', 'Nyagatare', 'Huye', 'Rubavu', 'Rwamagana', 'Muhanga', 'Karongi'].map(r => (
+                            <option key={r} value={r}>{r}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                        isDark ? 'text-stone-400' : 'text-slate-500'
+                    }`}>
+                        PO Number{' '}
+                        <span className={`normal-case font-normal ${isDark ? 'text-stone-500' : 'text-slate-400'}`}>
+                            (optional)
+                        </span>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="e.g. PO-2026-042"
+                        value={poId}
+                        onChange={(e) => setPoId(e.target.value.toUpperCase())}
+                        className={inputClass}
+                        autoComplete="off"
                     />
                 </div>
 
@@ -217,9 +270,100 @@ export default function QuickAdd() {
                     />
                 </div>
 
+                <div>
+                    <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                        isDark ? 'text-stone-400' : 'text-slate-500'
+                    }`}>
+                        Date Received
+                    </label>
+                    <input
+                        type="date"
+                        value={transactionDate}
+                        max={new Date().toISOString().slice(0, 10)}
+                        onChange={(e) => setTransactionDate(e.target.value)}
+                        className={inputClass}
+                    />
+                </div>
+
+                {/* Collapsible shipment + FX section */}
+                <button
+                    type="button"
+                    onClick={() => setShowAdvanced(v => !v)}
+                    className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                        isDark ? 'text-stone-400 hover:text-stone-200' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                    {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    Shipment &amp; FX details
+                </button>
+
+                {showAdvanced && (
+                    <div className={`space-y-4 p-4 rounded-xl border ${
+                        isDark ? 'border-stone-700 bg-stone-800/50' : 'border-slate-200 bg-slate-50'
+                    }`}>
+                        <div>
+                            <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                                isDark ? 'text-stone-400' : 'text-slate-500'
+                            }`}>Ship Type</label>
+                            <select value={shipType} onChange={(e) => setShipType(e.target.value)} className={inputClass}>
+                                <option value="">Select...</option>
+                                {['Sea', 'Road', 'Air'].map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                                    isDark ? 'text-stone-400' : 'text-slate-500'
+                                }`}>Port</label>
+                                <input type="text" placeholder="e.g. Dar es Salaam" value={portName}
+                                    onChange={(e) => setPortName(e.target.value)} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                                    isDark ? 'text-stone-400' : 'text-slate-500'
+                                }`}>Country</label>
+                                <input type="text" placeholder="e.g. Tanzania" value={country}
+                                    onChange={(e) => setCountry(e.target.value)} className={inputClass} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                                    isDark ? 'text-stone-400' : 'text-slate-500'
+                                }`}>Departure Date</label>
+                                <input type="date" value={departureTime}
+                                    onChange={(e) => setDepartureTime(e.target.value)} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                                    isDark ? 'text-stone-400' : 'text-slate-500'
+                                }`}>Arrival Date</label>
+                                <input type="date" value={arrivalTime}
+                                    onChange={(e) => setArrivalTime(e.target.value)} className={inputClass} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                                    isDark ? 'text-stone-400' : 'text-slate-500'
+                                }`}>USD → RWF</label>
+                                <input type="number" min={0} placeholder="e.g. 1285" value={usdToRwf}
+                                    onChange={(e) => setUsdToRwf(e.target.value)} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wide mb-1.5 ${
+                                    isDark ? 'text-stone-400' : 'text-slate-500'
+                                }`}>EUR → RWF</label>
+                                <input type="number" min={0} placeholder="e.g. 1450" value={eurToRwf}
+                                    onChange={(e) => setEurToRwf(e.target.value)} className={inputClass} />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <button
                     type="submit"
-                    disabled={loading || !product || qty < 1 || !region.trim()}
+                    disabled={loading || !product || qty < 1 || !region}
                     className={`
                         w-full py-3 rounded-xl font-semibold text-sm
                         flex items-center justify-center gap-2
