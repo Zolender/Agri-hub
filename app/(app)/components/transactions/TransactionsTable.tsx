@@ -49,10 +49,10 @@ export default function TransactionsTable({
 
     const getMovementTypeColor = (type: string) => {
         switch (type) {
-            case 'Sale':       return 'bg-rose-100 text-rose-700 border-rose-200';
-            case 'Purchase':   return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-            case 'Adjustment': return 'bg-blue-100 text-blue-700 border-blue-200';
-            default:           return 'bg-stone-100 text-stone-700 border-stone-200';
+            case 'Sale':       return isDark ? 'bg-rose-900/40 text-rose-400 border-rose-800'     : 'bg-rose-100 text-rose-700 border-rose-200';
+            case 'Purchase':   return isDark ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800' : 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            case 'Adjustment': return isDark ? 'bg-blue-900/40 text-blue-400 border-blue-800'     : 'bg-blue-100 text-blue-700 border-blue-200';
+            default:           return isDark ? 'bg-stone-800 text-stone-400 border-stone-700'     : 'bg-stone-100 text-stone-700 border-stone-200';
         }
     };
 

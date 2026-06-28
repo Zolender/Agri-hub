@@ -21,6 +21,7 @@ export default function FiltersBar({ totalCount }: FiltersBarProps) {
     const [productSearch, setProductSearch] = useState(searchParams.get('productId') || '');
     const [dateFrom, setDateFrom] = useState(searchParams.get('from') || '');
     const [dateTo, setDateTo] = useState(searchParams.get('to') || '');
+    const [showFilters, setShowFilters] = useState(false);
 
     const applyFilters = () => {
         const params = new URLSearchParams();
@@ -104,7 +105,7 @@ export default function FiltersBar({ totalCount }: FiltersBarProps) {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-emerald-50 rounded-xl">
+                    <div className={`p-2.5 rounded-xl ${isDark ? 'bg-emerald-900/50' : 'bg-emerald-50'}`}>
                         <Filter className="w-5 h-5 text-emerald-600" />
                     </div>
                     <div>
@@ -118,6 +119,21 @@ export default function FiltersBar({ totalCount }: FiltersBarProps) {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                    {/* Mobile toggle — hidden on desktop */}
+                    <button
+                        onClick={() => setShowFilters(v => !v)}
+                        className={`lg:hidden flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors font-medium ${
+                            isDark
+                                ? 'text-stone-300 bg-stone-800 hover:bg-stone-700 border-stone-700'
+                                : 'text-stone-700 bg-stone-50 hover:bg-stone-100 border-stone-200'
+                        }`}
+                    >
+                        <Filter className="w-4 h-4" />
+                        {showFilters ? 'Hide' : 'Filters'}
+                        {hasActiveFilters && !showFilters && (
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        )}
+                    </button>
                     {hasActiveFilters && (
                         <motion.button
                             whileHover={{ scale: 1.02 }}
@@ -163,13 +179,17 @@ export default function FiltersBar({ totalCount }: FiltersBarProps) {
                                     initial={{ scale: 0, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0, opacity: 0 }}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm rounded-full border border-emerald-200"
+                                    className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-full border ${
+                                        isDark
+                                            ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800'
+                                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    }`}
                                 >
                                     <Icon className="w-3.5 h-3.5" />
                                     <span className="font-medium">{filter.label}</span>
                                     <button
                                         onClick={() => removeFilter(filter.key)}
-                                        className="hover:bg-emerald-100 rounded-full p-0.5 transition-colors"
+                                        className={`rounded-full p-0.5 transition-colors ${isDark ? 'hover:bg-emerald-800' : 'hover:bg-emerald-100'}`}
                                     >
                                         <X className="w-3 h-3" />
                                     </button>
@@ -180,102 +200,104 @@ export default function FiltersBar({ totalCount }: FiltersBarProps) {
                 )}
             </AnimatePresence>
 
-            {/* Filter Inputs Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {/* Product ID */}
-                <div>
-                    <label className={labelClass}>Product ID</label>
-                    <div className="relative">
-                        <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDark ? 'text-stone-500' : 'text-stone-400'}`} />
+            {/* Filter Inputs — always visible on lg+, toggle on mobile */}
+            <div className={`${showFilters ? 'block' : 'hidden'} lg:block space-y-4`}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {/* Product ID */}
+                    <div>
+                        <label className={labelClass}>Product ID</label>
+                        <div className="relative">
+                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDark ? 'text-stone-500' : 'text-stone-400'}`} />
+                            <input
+                                type="text"
+                                placeholder="Search by ID..."
+                                value={productSearch}
+                                onChange={(e) => setProductSearch(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+                                className={`${inputClass} pl-10`}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Movement Type */}
+                    <div>
+                        <label className={labelClass}>Movement Type</label>
+                        <select
+                            value={movementType}
+                            onChange={(e) => setMovementType(e.target.value)}
+                            className={inputClass}
+                        >
+                            <option value="">All Types</option>
+                            <option value="Sale">Sale</option>
+                            <option value="Purchase">Purchase</option>
+                            <option value="Adjustment">Adjustment</option>
+                        </select>
+                    </div>
+
+                    {/* Region */}
+                    <div>
+                        <label className={labelClass}>Region</label>
+                        <select
+                            value={region}
+                            onChange={(e) => setRegion(e.target.value)}
+                            className={inputClass}
+                        >
+                            <option value="">All regions</option>
+                            {['Kigali', 'Musanze', 'Nyagatare', 'Huye', 'Rubavu', 'Rwamagana', 'Muhanga', 'Karongi'].map(r => (
+                                <option key={r} value={r}>{r}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Date From */}
+                    <div>
+                        <label className={labelClass}>From Date</label>
                         <input
-                            type="text"
-                            placeholder="Search by ID..."
-                            value={productSearch}
-                            onChange={(e) => setProductSearch(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-                            className={`${inputClass} pl-10`}
+                            type="date"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            className={inputClass}
+                        />
+                    </div>
+
+                    {/* Date To */}
+                    <div>
+                        <label className={labelClass}>To Date</label>
+                        <input
+                            type="date"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            className={inputClass}
                         />
                     </div>
                 </div>
 
-                {/* Movement Type */}
-                <div>
-                    <label className={labelClass}>Movement Type</label>
-                    <select
-                        value={movementType}
-                        onChange={(e) => setMovementType(e.target.value)}
-                        className={inputClass}
+                {/* Apply Button */}
+                <div className="flex justify-end pt-2">
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={applyFilters}
+                        disabled={isPending}
+                        className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-colors font-semibold text-sm flex items-center gap-2 shadow-sm"
                     >
-                        <option value="">All Types</option>
-                        <option value="Sale">Sale</option>
-                        <option value="Purchase">Purchase</option>
-                        <option value="Adjustment">Adjustment</option>
-                    </select>
+                        {isPending ? (
+                            <>
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                                />
+                                Applying...
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles className="w-4 h-4" />
+                                Apply Filters
+                            </>
+                        )}
+                    </motion.button>
                 </div>
-
-                {/* Region */}
-                <div>
-                    <label className={labelClass}>Region</label>
-                    <select
-                        value={region}
-                        onChange={(e) => setRegion(e.target.value)}
-                        className={inputClass}
-                    >
-                        <option value="">All regions</option>
-                        {['Kigali', 'Musanze', 'Nyagatare', 'Huye', 'Rubavu', 'Rwamagana', 'Muhanga', 'Karongi'].map(r => (
-                            <option key={r} value={r}>{r}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Date From */}
-                <div>
-                    <label className={labelClass}>From Date</label>
-                    <input
-                        type="date"
-                        value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
-                        className={inputClass}
-                    />
-                </div>
-
-                {/* Date To */}
-                <div>
-                    <label className={labelClass}>To Date</label>
-                    <input
-                        type="date"
-                        value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
-                        className={inputClass}
-                    />
-                </div>
-            </div>
-
-            {/* Apply Button */}
-            <div className="flex justify-end pt-2">
-                <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={applyFilters}
-                    disabled={isPending}
-                    className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-colors font-semibold text-sm flex items-center gap-2 shadow-sm"
-                >
-                    {isPending ? (
-                        <>
-                            <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                            />
-                            Applying...
-                        </>
-                    ) : (
-                        <>
-                            <Sparkles className="w-4 h-4" />
-                            Apply Filters
-                        </>
-                    )}
-                </motion.button>
             </div>
         </motion.div>
     );

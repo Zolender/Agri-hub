@@ -34,6 +34,12 @@ const roleBadge: Record<UserRole, string> = {
     ANALYST: "bg-sky-100 text-sky-700",
 };
 
+const roleBadgeDark: Record<UserRole, string> = {
+    ADMIN:   "bg-rose-900/40 text-rose-400",
+    MANAGER: "bg-amber-900/40 text-amber-400",
+    ANALYST: "bg-sky-900/40 text-sky-400",
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function UsersTable({ users, currentUserId }: UsersTableProps) {
@@ -110,7 +116,7 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="px-6 py-3 bg-red-50 text-red-700 text-sm font-medium border-b border-red-100"
+                            className={`px-6 py-3 text-sm font-medium border-b ${isDark ? 'bg-red-900/30 text-red-400 border-red-900' : 'bg-red-50 text-red-700 border-red-100'}`}
                         >
                             {deleteError}
                         </motion.div>
@@ -159,7 +165,7 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
 
                                         {/* Role badge */}
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${roleBadge[user.role]}`}>
+                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${isDark ? roleBadgeDark[user.role] : roleBadge[user.role]}`}>
                                                 <ShieldCheck className="w-3 h-3" />
                                                 {user.role}
                                             </span>
