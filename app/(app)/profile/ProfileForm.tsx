@@ -18,7 +18,7 @@ type Props = {
 };
 
 const roleBadge: Record<string, string> = {
-    ADMIN:   "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400",
+    ADMIN:   "bg-rose-100 text-rose-700",
     MANAGER: "bg-amber-100 text-amber-700",
     ANALYST: "bg-sky-100 text-sky-700",
 };

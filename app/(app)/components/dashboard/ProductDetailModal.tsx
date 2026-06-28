@@ -10,6 +10,7 @@ import { useDarkMode } from '@/app/(app)/components/DarkModeContext';
 
 type Product = {
     id: string;
+    name?: string | null;
     categoryId: string;
     unitOfMeasure: string;
     unitCostRwf: number;
@@ -170,7 +171,7 @@ export default function ProductDetailModal({ product, userRole, onClose }: Produ
                                         {product.id}
                                     </h2>
                                     <p className={`text-sm ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
-                                        {product.categoryId}
+                                        {product.name ?? product.categoryId}
                                     </p>
                                 </div>
                             </div>
@@ -185,8 +186,8 @@ export default function ProductDetailModal({ product, userRole, onClose }: Produ
                         <div className="flex items-center gap-2">
                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                                 canEdit
-                                    ? 'bg-emerald-100 text-emerald-700'
-                                    : 'bg-stone-100 text-stone-500'
+                                    ? isDark ? 'bg-emerald-900/40 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                                    : isDark ? 'bg-stone-800 text-stone-400'        : 'bg-stone-100 text-stone-500'
                             }`}>
                                 {userRole}
                             </span>
@@ -266,8 +267,8 @@ export default function ProductDetailModal({ product, userRole, onClose }: Produ
                                 animate={{ opacity: 1, y: 0 }}
                                 className={`text-sm px-4 py-2.5 rounded-xl font-medium ${
                                     feedback.ok
-                                        ? 'bg-emerald-100 text-emerald-700'
-                                        : 'bg-red-100 text-red-700'
+                                        ? isDark ? 'bg-emerald-900/40 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                                        : isDark ? 'bg-red-900/40 text-red-400'         : 'bg-red-100 text-red-700'
                                 }`}
                             >
                                 {feedback.msg}
