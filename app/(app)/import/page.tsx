@@ -29,6 +29,12 @@ function formatBytes(bytes: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+const REQUIRED_CSV_HEADERS = [
+    'product_id', 'category_id', 'unit_of_measure', 'unit_cost_rwf', 'selling_price_rwf',
+    'reorder_point_units', 'lead_time_buffer_days', 'movement_type',
+    'remaining_stock_units', 'order_id', 'region', 'transaction_date', 'landed_cost_rwf',
+];
+
 function downloadTemplateCsv() {
     const headers = [
         // Required core fields
@@ -142,6 +148,17 @@ export default function ImportPage() {
 
                 if (allData.length === 0) {
                     toast.error('The CSV file appears to be empty.');
+                    setIsUploading(false);
+                    return;
+                }
+
+                const presentHeaders = results.meta.fields ?? [];
+                const missingHeaders = REQUIRED_CSV_HEADERS.filter(h => !presentHeaders.includes(h));
+                if (missingHeaders.length > 0) {
+                    toast.error(
+                        `CSV is missing required columns: ${missingHeaders.join(', ')}. Download the template to see the correct format.`,
+                        { duration: 10000 }
+                    );
                     setIsUploading(false);
                     return;
                 }
