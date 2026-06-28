@@ -30,14 +30,42 @@ function formatBytes(bytes: number): string {
 
 function downloadTemplateCsv() {
     const headers = [
-        'product_id', 'product_name', 'category', 'unit',
-        'quantity', 'unit_price', 'region', 'movement_type', 'date'
+        // Required core fields
+        'product_id', 'category_id', 'unit_of_measure', 'unit_cost_rwf', 'selling_price_rwf',
+        'reorder_point_units', 'lead_time_buffer_days',
+        'movement_type', 'quantity_ordered_units', 'remaining_stock_units',
+        'order_id', 'region', 'transaction_date', 'landed_cost_rwf',
+        // Optional tracking fields
+        'lost_sale_qty_units', 'customer_id', 'po_id', 'supplier_id',
+        // Optional shipment fields
+        'ship_type', 'port_name', 'country', 'arrival_time', 'departure_time',
+        // Optional FX fields
+        'USD_RWF', 'EUR_RWF',
     ];
-    const example = [
-        'PROD-001', 'DAP Fertilizer 50kg', 'Fertilizers', 'bag',
-        '120', '45000', 'Kigali', 'IN', '2026-03-27'
+
+    // Example row 1 — a Purchase with shipment and FX data
+    const purchaseRow = [
+        'FERT-DAP-50KG', 'Fertilizers', 'bag', '38000', '45000',
+        '50', '14',
+        'Purchase', '120', '210',
+        'PO-2026-001', 'Kigali', '2026-03-27', '41000',
+        '0', '', 'PO-2026-001', 'ETG-Rwanda',
+        'Sea', 'Dar es Salaam', 'Tanzania', '2026-04-10', '2026-03-20',
+        '1285', '1450',
     ];
-    const csv = [headers.join(','), example.join(',')].join('\n');
+
+    // Example row 2 — a Sale with a lost sale recorded
+    const saleRow = [
+        'FERT-DAP-50KG', 'Fertilizers', 'bag', '38000', '45000',
+        '50', '14',
+        'Sale', '10', '200',
+        'ORD-2026-002', 'Musanze', '2026-04-01', '41000',
+        '2', 'CUST-001', '', '',
+        '', '', '', '', '',
+        '', '',
+    ];
+
+    const csv = [headers.join(','), purchaseRow.join(','), saleRow.join(',')].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
