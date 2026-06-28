@@ -2,7 +2,6 @@
 
 import prisma from "@/app/lib/db";
 import { auth } from "@/app/lib/auth";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { TransactionCsvSchema, type TransactionRow } from "../validator/csv_schema";
 
@@ -12,11 +11,24 @@ export async function importInventoryAction(data: any[]){
         return {success: false, error: "Unauthorized"}
     }
     try{
-        const validatedRows = data.filter(row=> row.product_id).map(row => TransactionCsvSchema.parse(row));
-        const results = []
-        const errors = []
+        const results: any[] = [];
+        const errors: Array<{ productId: string; rowIndex: number; error: string }> = [];
 
-        for(const row of validatedRows){
+        for (let i = 0; i < data.length; i++) {
+            const rawRow = data[i];
+            if (!rawRow.product_id) continue;
+
+            const parsed = TransactionCsvSchema.safeParse(rawRow);
+            if (!parsed.success) {
+                errors.push({
+                    productId: String(rawRow.product_id),
+                    rowIndex: i,
+                    error: parsed.error.issues[0]?.message ?? 'Validation failed',
+                });
+                continue;
+            }
+
+            const row = parsed.data;
             let attempts = 0
             const maxAttempts = 3
             let lastError = null
@@ -120,7 +132,8 @@ export async function importInventoryAction(data: any[]){
                     console.error(`[importInventoryAction] row ${row.product_id}:`, lastError);
                     errors.push({
                         productId: row.product_id,
-                        error: 'Row failed to import. Check the data and try again.'
+                        rowIndex: i,
+                        error: 'Row failed to import. Check the data and try again.',
                     })
                 }
             }

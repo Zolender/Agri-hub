@@ -18,6 +18,7 @@ import ImportPageHeader from '../components/import/importPageHearder';
 type ImportError = {
     productId: string;
     error: string;
+    rowIndex?: number;
     rowNumber?: number;
 };
 
@@ -135,7 +136,7 @@ export default function ImportPage() {
         Papa.parse(file, {
             header: true,
             skipEmptyLines: 'greedy',
-            transformHeader: (h) => h.trim(),
+            transformHeader: (h) => h.replace(/^﻿/, '').trim(),
             complete: async (results) => {
                 const allData = results.data as Record<string, unknown>[];
 
@@ -163,9 +164,9 @@ export default function ImportPage() {
                             totalImported += response.count;
 
                             if (response.errors && response.errors.length > 0) {
-                                const errorsWithRows = response.errors.map((err: ImportError, index: number) => ({
+                                const errorsWithRows = response.errors.map((err: ImportError) => ({
                                     ...err,
-                                    rowNumber: startRow + index,
+                                    rowNumber: startRow + (err.rowIndex ?? 0),
                                 }));
                                 allErrors.push(...errorsWithRows);
                                 toast.warning(response.message || `${response.errors.length} rows failed`);
