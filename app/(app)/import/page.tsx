@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import DangerModal from '../components/DangerModal';
 import { useDarkMode } from '../components/DarkModeContext';
-import ImportPageHeader from '../components/import/importPageHearder';
+import ImportPageHeader from '../components/import/ImportPageHeader';
 
 type ImportError = {
     productId: string;
@@ -429,7 +429,9 @@ export default function ImportPage() {
                                         whileHover={{ scale: 1.04 }}
                                         whileTap={{ scale: 0.96 }}
                                         onClick={downloadErrorReport}
-                                        className="flex items-center gap-2 px-4 py-2 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg font-medium text-sm transition-colors"
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                                            isDark ? 'bg-rose-900/40 text-rose-400 hover:bg-rose-900/60' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+                                        }`}
                                     >
                                         <Download className="w-4 h-4" />
                                         Download Error Report
@@ -642,6 +644,7 @@ export default function ImportPage() {
                                     </span>
                                     <button
                                         onClick={() => setFile(null)}
+                                        aria-label="Remove selected file"
                                         className={`ml-auto transition-colors ${isDark ? 'text-stone-500 hover:text-rose-400' : 'text-stone-400 hover:text-rose-500'}`}
                                     >
                                         <X className="w-4 h-4" />
