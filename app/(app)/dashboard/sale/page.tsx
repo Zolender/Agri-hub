@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import QuickSale from "@/app/(app)/components/inventory/QuickSale";
 import SalePageHeader, { SalePageSidebar } from "../../components/inventory/SalePageHeader";
+
+export const metadata: Metadata = { title: 'Record Sale | AgriHub' };
 export default function SalePage() {
     return (
         <div className="max-w-6xl mx-auto space-y-8 p-6">

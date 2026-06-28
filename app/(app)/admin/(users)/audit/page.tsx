@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import prisma from "@/app/lib/db";
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = { title: 'Audit Log | AgriHub' };
 import AuditLogTable from "./AuditLogTable";
 
 const PAGE_SIZE = 20;

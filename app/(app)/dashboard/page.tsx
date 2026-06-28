@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import prisma from "@/app/lib/db";
 import AnimatedStatCard from "@/app/(app)/components/dashboard/AnimatedStatCard";
+
+export const metadata: Metadata = { title: 'Dashboard | AgriHub' };
 import AlertsPanel, { type AlertProduct, type ShipmentDelay } from "../components/dashboard/AlertsPanel";
 import SectionLabel from "../components/dashboard/charts/SectionLabel";
 import FinancialMiniCard from "../components/dashboard/charts/FinancialMiniCard";

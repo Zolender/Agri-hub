@@ -1,7 +1,10 @@
+import type { Metadata } from 'next';
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/db";
 import ProfileForm from "./ProfileForm";
+
+export const metadata: Metadata = { title: 'My Profile | AgriHub' };
 
 export default async function ProfilePage() {
     const session = await auth();

@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import prisma from "@/app/lib/db";
 import { auth } from "@/app/lib/auth";
 import StockOnHandTable from "@/app/(app)/components/dashboard/StockOnHandTable";
+
+export const metadata: Metadata = { title: 'Inventory | AgriHub' };
 import InventoryPageHeader from "@/app/(app)/components/inventory/InventoryPageHeader";
 
 export const dynamic = 'force-dynamic';

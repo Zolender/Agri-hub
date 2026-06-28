@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 import AdjustmentForm from "@/app/(app)/components/inventory/AdjustmentForm";
+
+export const metadata: Metadata = { title: 'Stock Adjustment | AgriHub' };
 import AdjustmentPageHeader from "@/app/(app)/components/inventory/AdjustmentPageHeader";
 
 export default async function AdjustmentPage() {

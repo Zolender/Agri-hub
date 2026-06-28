@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import prisma from "@/app/lib/db";
 import FiltersBar from "@/app/(app)/components/transactions/FiltersBar";
+
+export const metadata: Metadata = { title: 'Transactions | AgriHub' };
 import TransactionsTable from "@/app/(app)/components/transactions/TransactionsTable";
 import TransactionsHeader from "../components/transactions/TransactionsHeader";
 

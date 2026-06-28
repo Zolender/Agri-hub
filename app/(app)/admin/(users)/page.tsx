@@ -1,7 +1,10 @@
+import type { Metadata } from 'next';
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/db";
 import AdminPageHeader from "@/app/(app)/components/admin/AdminPageHeader";
+
+export const metadata: Metadata = { title: 'Users | AgriHub' };
 import UsersTable from "../../components/admin/usersTable";
 
 export default async function AdminUsersPage() {

@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 import QuickAdd from "@/app/(app)/components/inventory/QuickAdd";
+
+export const metadata: Metadata = { title: 'Add Stock | AgriHub' };
 import QuickAddHeader from "../../components/inventory/QuickAddHeader";
 export default async function QuickAddPage() {
     const session = await auth();
