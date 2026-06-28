@@ -178,6 +178,7 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
                                                     onClick={() => setEditTarget(user)}
                                                     disabled={isSelf}
                                                     title={isSelf ? "Cannot edit your own role" : "Edit role"}
+                                                    aria-label={isSelf ? "Cannot edit your own role" : `Edit role for ${user.name ?? user.email}`}
                                                     className={`p-2 rounded-lg transition-colors ${
                                                         isSelf
                                                             ? "opacity-30 cursor-not-allowed"
@@ -193,6 +194,7 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
                                                     onClick={() => setDeleteTarget(user)}
                                                     disabled={isSelf}
                                                     title={isSelf ? "Cannot delete yourself" : "Delete user"}
+                                                    aria-label={isSelf ? "Cannot delete yourself" : `Delete ${user.name ?? user.email}`}
                                                     className={`p-2 rounded-lg transition-colors ${
                                                         isSelf
                                                             ? "opacity-30 cursor-not-allowed"

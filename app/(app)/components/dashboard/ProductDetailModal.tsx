@@ -177,6 +177,7 @@ export default function ProductDetailModal({ product, userRole, onClose }: Produ
                             </div>
                             <button
                                 onClick={onClose}
+                                aria-label="Close dialog"
                                 className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-stone-800 text-stone-400' : 'hover:bg-stone-100 text-stone-500'}`}
                             >
                                 <X className="w-4 h-4" />
