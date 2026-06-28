@@ -12,6 +12,7 @@ import {
     ShieldCheck,
     ShoppingBag,
     PackagePlus,
+    SlidersHorizontal,
     LogOut,
     ChevronRight,
     Users,
@@ -63,7 +64,8 @@ export default function SidebarNav({
         { name: 'Inventory',     href: '/dashboard/inventory', icon: Boxes,           minRole: 'ANALYST' },
         { name: 'Transactions',  href: '/transactions',         icon: History,         minRole: 'ANALYST' },
         { name: 'Record Sale',   href: '/dashboard/sale', icon: ShoppingBag,     minRole: 'ANALYST' },
-        { name: 'Receive Stock', href: '/dashboard/add',  icon: PackagePlus,     minRole: 'MANAGER' },
+        { name: 'Receive Stock', href: '/dashboard/add',    icon: PackagePlus,        minRole: 'MANAGER' },
+        { name: 'Adjust Stock',  href: '/dashboard/adjust', icon: SlidersHorizontal,  minRole: 'MANAGER' },
         { name: 'Import Data',   href: '/import',         icon: FileUp,          minRole: 'MANAGER' },
     ];
 

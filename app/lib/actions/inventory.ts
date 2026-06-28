@@ -243,6 +243,76 @@ export async function recordPurchaseAction(
     }
 }
 
+export async function recordAdjustmentAction(
+    productId: string,
+    quantity: number,
+    direction: 'increase' | 'decrease',
+    reason: string,
+    region: string,
+    transactionDate?: string
+) {
+    const session = await auth();
+    if (!session || (session.user?.role !== 'ADMIN' && session.user?.role !== 'MANAGER')) {
+        return { success: false, error: 'Only Managers and Admins can record adjustments.' };
+    }
+
+    const date = transactionDate ? new Date(transactionDate) : new Date();
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            const product = await tx.product.findUnique({ where: { id: productId } });
+            if (!product) throw new Error('Product not found.');
+            if (direction === 'decrease' && product.quantity < quantity) {
+                throw new Error('Adjustment quantity exceeds current stock.');
+            }
+
+            const updated = await tx.product.update({
+                where: { id: productId },
+                data: { quantity: direction === 'increase' ? { increment: quantity } : { decrement: quantity } },
+            });
+
+            const transaction = await tx.transaction.create({
+                data: {
+                    productId,
+                    movementType: 'Adjustment',
+                    remainingStockUnits: updated.quantity,
+                    quantityOrderedUnits: quantity,
+                    region,
+                    orderId: `ADJ-${Date.now()}`,
+                    transactionDate: date,
+                },
+            });
+
+            await tx.transactionMetrics.create({
+                data: {
+                    transactionId: transaction.id,
+                    fulfillmentRatio: 100,
+                    stockPressure: product.reorderPointUnits > 0
+                        ? updated.quantity / product.reorderPointUnits
+                        : null,
+                },
+            });
+        });
+
+        await logAction({
+            userId:     session.user?.id,
+            userEmail:  session.user?.email,
+            userRole:   session.user?.role,
+            action:     AuditAction.RECORD_ADJUSTMENT,
+            targetId:   productId,
+            targetType: 'Product',
+            detail:     `Adjustment (${direction}) ${quantity} units of ${productId} in ${region} — ${reason}`,
+        });
+
+        revalidatePath('/dashboard');
+        revalidatePath('/transactions');
+        return { success: true };
+    } catch (error: any) {
+        console.error('[recordAdjustmentAction]:', error);
+        return { success: false, error: error.message ?? 'An unexpected error occurred.' };
+    }
+}
+
 export async function updateProductAction(
     productId: string,
     data: {
