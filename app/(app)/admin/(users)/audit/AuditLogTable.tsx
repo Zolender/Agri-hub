@@ -29,8 +29,9 @@ const actionStyles: Record<string, { bg: string; darkBg: string; text: string; d
     DELETE_USER:     { bg: "bg-red-100",     darkBg: "bg-red-900/40",     text: "text-red-700",     darkText: "text-red-400",     label: "Delete User"     },
     UPDATE_PRODUCT:  { bg: "bg-blue-100",    darkBg: "bg-blue-900/40",    text: "text-blue-700",    darkText: "text-blue-400",    label: "Update Product"  },
     RECORD_SALE:     { bg: "bg-rose-100",    darkBg: "bg-rose-900/40",    text: "text-rose-700",    darkText: "text-rose-400",    label: "Sale"            },
-    RECORD_PURCHASE: { bg: "bg-sky-100",     darkBg: "bg-sky-900/40",     text: "text-sky-700",     darkText: "text-sky-400",     label: "Purchase"        },
-    CHANGE_PASSWORD: { bg: "bg-violet-100",  darkBg: "bg-violet-900/40",  text: "text-violet-700",  darkText: "text-violet-400",  label: "Change Password" },
+    RECORD_PURCHASE:    { bg: "bg-sky-100",     darkBg: "bg-sky-900/40",     text: "text-sky-700",     darkText: "text-sky-400",     label: "Purchase"        },
+    RECORD_ADJUSTMENT:  { bg: "bg-amber-100",  darkBg: "bg-amber-900/40",   text: "text-amber-700",  darkText: "text-amber-400",   label: "Adjustment"      },
+    CHANGE_PASSWORD:    { bg: "bg-violet-100", darkBg: "bg-violet-900/40",  text: "text-violet-700", darkText: "text-violet-400",  label: "Change Password" },
 };
 
 export default function AuditLogTable({ logs, page, totalPages, totalCount }: Props) {

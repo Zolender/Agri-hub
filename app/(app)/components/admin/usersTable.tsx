@@ -7,7 +7,7 @@ import { useDarkMode } from "@/app/(app)/components/DarkModeContext";
 import { deleteUserAction } from "@/app/lib/actions/admin";
 import DangerModal from "@/app/(app)/components/DangerModal";
 import EditRoleModal from "./EditRoleModal";
-import CreateUserModal from "./createUserModal";
+import CreateUserModal from "./CreateUserModal";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

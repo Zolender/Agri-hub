@@ -7,6 +7,7 @@ import ProductDetailModal from "@/app/(app)/components/dashboard/ProductDetailMo
 
 type Product = {
     id: string;
+    name?: string | null;
     categoryId: string;
     unitOfMeasure: string;
     unitCostRwf: number;
@@ -209,8 +210,15 @@ const StockOnHandTable = ({
                                             className={`transition-colors cursor-pointer ${isDark ? 'hover:bg-stone-800' : 'hover:bg-gray-50'}`}
                                         >
                                             {/* Product ID */}
-                                            <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isDark ? 'text-stone-200' : 'text-gray-900'}`}>
-                                                {product.id}
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className={`text-sm font-medium ${isDark ? 'text-stone-200' : 'text-gray-900'}`}>
+                                                    {product.id}
+                                                </div>
+                                                {product.name && (
+                                                    <div className={`text-xs mt-0.5 ${isDark ? 'text-stone-500' : 'text-stone-400'}`}>
+                                                        {product.name}
+                                                    </div>
+                                                )}
                                             </td>
 
                                             {/* Category */}
@@ -243,11 +251,11 @@ const StockOnHandTable = ({
                                             {/* Status */}
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {isLowStock ? (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isDark ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-800'}`}>
                                                         Low Stock
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isDark ? 'bg-emerald-900/40 text-emerald-400' : 'bg-emerald-100 text-emerald-800'}`}>
                                                         In Stock
                                                     </span>
                                                 )}
