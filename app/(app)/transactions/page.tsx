@@ -1,7 +1,7 @@
 import prisma from "@/app/lib/db";
 import FiltersBar from "@/app/(app)/components/transactions/FiltersBar";
 import TransactionsTable from "@/app/(app)/components/transactions/TransactionsTable";
-import TransactionsHeader from "../components/transactions/TramsactionsHeader";
+import TransactionsHeader from "../components/transactions/TransactionsHeader";
 
 
 type SearchParams = {

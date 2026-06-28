@@ -1,13 +1,24 @@
 "use client";
 
-import { History, ShieldCheck } from "lucide-react";
+import { History, ShieldCheck, ArrowLeft } from "lucide-react";
 import { useDarkMode } from "../DarkModeContext";
+import { useRouter } from "next/navigation";
 
 export default function SalePageHeader() {
     const { isDark } = useDarkMode();
+    const router = useRouter();
 
     return (
         <header className="flex flex-col gap-1">
+            <button
+                onClick={() => router.back()}
+                className={`flex items-center gap-1.5 text-sm font-medium mb-2 w-fit transition-colors ${
+                    isDark ? 'text-stone-400 hover:text-stone-100' : 'text-stone-500 hover:text-stone-800'
+                }`}
+            >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+            </button>
             <div className={`flex items-center gap-2 text-xs font-medium uppercase tracking-widest ${
                 isDark ? 'text-stone-500' : 'text-slate-400'
             }`}>
@@ -45,7 +56,7 @@ export function SalePageSidebar() {
                 </div>
                 <p className={`text-sm leading-relaxed ${isDark ? 'text-stone-300' : 'text-slate-300'}`}>
                     Always verify the <strong>Product Preview</strong> before confirming.
-                    If the stock is below 10 units, the system will highlight it in amber.
+                    Products at or below their reorder point are flagged as <strong>Low Stock</strong>.
                 </p>
             </div>
 

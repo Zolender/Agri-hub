@@ -216,14 +216,16 @@ export default function FiltersBar({ totalCount }: FiltersBarProps) {
                 {/* Region */}
                 <div>
                     <label className={labelClass}>Region</label>
-                    <input
-                        type="text"
-                        placeholder="Enter region..."
+                    <select
                         value={region}
                         onChange={(e) => setRegion(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                         className={inputClass}
-                    />
+                    >
+                        <option value="">All regions</option>
+                        {['Kigali', 'Musanze', 'Nyagatare', 'Huye', 'Rubavu', 'Rwamagana', 'Muhanga', 'Karongi'].map(r => (
+                            <option key={r} value={r}>{r}</option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* Date From */}

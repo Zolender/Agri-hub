@@ -1,5 +1,5 @@
 import QuickSale from "@/app/(app)/components/inventory/QuickSale";
-import SalePageHeader, {SalePageSidebar} from "../../components/inventory/SalePageheader";
+import SalePageHeader, { SalePageSidebar } from "../../components/inventory/SalePageHeader";
 export default function SalePage() {
     return (
         <div className="max-w-6xl mx-auto space-y-8 p-6">

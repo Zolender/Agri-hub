@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Agri Hub",
-    description: "A app design to help out agri sellers",
+    title: "AgriHub",
+    description: "Inventory management for agri-input distributors in Rwanda.",
 };
 
 export default function RootLayout({

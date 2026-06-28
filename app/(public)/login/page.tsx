@@ -88,7 +88,7 @@ export default function LoginPage() {
                                 className="text-3xl font-black text-stone-900 tracking-tight"
                                 style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
                             >
-                                Rwanda <span className="text-emerald-600">AgriHub</span>
+                                <span className="text-emerald-600">AgriHub</span>
                             </h1>
                             <p className="text-stone-500 text-sm mt-2">
                                 Welcome back. Sign in to continue.

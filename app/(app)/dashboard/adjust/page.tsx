@@ -1,7 +1,7 @@
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 import AdjustmentForm from "@/app/(app)/components/inventory/AdjustmentForm";
-import { SlidersHorizontal } from "lucide-react";
+import AdjustmentPageHeader from "@/app/(app)/components/inventory/AdjustmentPageHeader";
 
 export default async function AdjustmentPage() {
     const session = await auth();
@@ -9,20 +9,11 @@ export default async function AdjustmentPage() {
     if (!session) redirect("/login");
     if (session.user?.role === "ANALYST") redirect("/dashboard");
 
+    const role = session.user?.role as 'ADMIN' | 'MANAGER';
+
     return (
         <div className="max-w-lg mx-auto space-y-6">
-            <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                    <SlidersHorizontal className="w-6 h-6 text-amber-600" />
-                    <h1 className="text-2xl font-black tracking-tight" style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}>
-                        Stock Adjustment
-                    </h1>
-                </div>
-                <p className="text-sm text-stone-500 ml-9">
-                    Correct stock levels for breakage, spoilage, counting errors, or returns.
-                    Every adjustment is logged to the audit trail.
-                </p>
-            </div>
+            <AdjustmentPageHeader role={role} />
 
             <AdjustmentForm />
 

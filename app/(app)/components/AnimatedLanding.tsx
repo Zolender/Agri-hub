@@ -138,7 +138,7 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
                             <Leaf className="w-4 h-4 text-white" strokeWidth={2.5} />
                         </div>
                         <span className={`text-sm font-semibold ${isDark ? 'text-stone-100' : 'text-stone-800'} tracking-tight`}>
-                            Rwanda <span className="text-emerald-600">AgriHub</span>
+                            <span className="text-emerald-600">AgriHub</span>
                         </span>
                     </div>
 
@@ -550,11 +550,11 @@ export default function AnimatedLanding({ session }: AnimatedLandingProps) {
                             <Leaf className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
                         </div>
                         <span className={`text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>
-                            Rwanda <span className="text-emerald-600">AgriHub</span>
+                            <span className="text-emerald-600">AgriHub</span>
                         </span>
                     </div>
                     <div className={`flex items-center gap-5 text-xs ${isDark ? 'text-stone-500' : 'text-stone-400'}`}>
-                        <span>© 2026 Rwanda AgriHub</span>
+                        <span>© 2026 AgriHub</span>
                         <span className={`w-px h-3 ${isDark ? 'bg-stone-700' : 'bg-stone-200'}`} />
                         <motion.a
                             href="https://github.com/Zolender/rwanda-agri-hub"
