@@ -57,12 +57,21 @@ export async function getPaginatedInventory(page: number = 1, search: string = "
 export async function recordSaleAction(
     productId: string,
     quantitySold: number,
-    region: string
+    region: string,
+    options?: {
+        lostSaleQty?: number;
+        customerId?: string;
+        transactionDate?: string;
+    }
 ) {
     const session = await auth();
     if (!session) {
         return { success: false, error: "You must be signed in to record a sale." };
     }
+
+    const lostSaleQty = options?.lostSaleQty ?? 0;
+    const customerId = options?.customerId || null;
+    const transactionDate = options?.transactionDate ? new Date(options.transactionDate) : new Date();
 
     try {
         const result = await prisma.$transaction(async (tx) => {
@@ -81,10 +90,12 @@ export async function recordSaleAction(
                     productId,
                     movementType: "Sale",
                     remainingStockUnits: updated.quantity,
-                    quantityOrderedUnits: quantitySold,
+                    quantityOrderedUnits: quantitySold + lostSaleQty,
+                    lostSaleQtyUnits: lostSaleQty,
+                    customerId,
                     region,
                     orderId: `SALE-${Date.now()}`,
-                    transactionDate: new Date(),
+                    transactionDate,
                 },
             });
 
@@ -98,7 +109,7 @@ export async function recordSaleAction(
             action:     AuditAction.RECORD_SALE,
             targetId:   productId,
             targetType: "Product",
-            detail:     `Sold ${quantitySold} units of ${productId} in ${region}`,
+            detail:     `Sold ${quantitySold} units of ${productId} in ${region}${lostSaleQty > 0 ? `, ${lostSaleQty} lost` : ''}`,
         });
 
         revalidatePath("/dashboard");

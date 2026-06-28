@@ -10,7 +10,10 @@ export default function QuickSale() {
     const [sku, setSku] = useState('');
     const [product, setProduct] = useState<any>(null);
     const [qty, setQty] = useState(1);
+    const [lostSaleQty, setLostSaleQty] = useState(0);
+    const [customerId, setCustomerId] = useState('');
     const [region, setRegion] = useState('');
+    const [transactionDate, setTransactionDate] = useState(new Date().toISOString().slice(0, 10));
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -29,12 +32,19 @@ export default function QuickSale() {
     const handleSale = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const res = await recordSaleAction(sku, qty, region);
+        const res = await recordSaleAction(sku, qty, region, {
+            lostSaleQty: lostSaleQty || 0,
+            customerId: customerId || undefined,
+            transactionDate,
+        });
         if (res.success) {
             toast.success("Sale recorded!");
             setSku('');
             setQty(1);
+            setLostSaleQty(0);
+            setCustomerId('');
             setRegion('');
+            setTransactionDate(new Date().toISOString().slice(0, 10));
         } else {
             toast.error(res.error);
         }
@@ -82,12 +92,39 @@ export default function QuickSale() {
 
                 <input
                     type="number"
+                    min={1}
+                    placeholder="Units sold"
                     value={qty}
                     onChange={(e) => setQty(Number(e.target.value))}
                     className={`w-full p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-emerald-500 ${
                         isDark
-                            ? 'bg-stone-800 text-stone-100'
-                            : 'bg-slate-50 text-slate-700'
+                            ? 'bg-stone-800 text-stone-100 placeholder:text-stone-500'
+                            : 'bg-slate-50 text-slate-700 placeholder:text-slate-400'
+                    }`}
+                />
+
+                <input
+                    type="number"
+                    min={0}
+                    placeholder="Units the customer couldn't get (lost sale) — optional"
+                    value={lostSaleQty || ''}
+                    onChange={(e) => setLostSaleQty(Number(e.target.value) || 0)}
+                    className={`w-full p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-amber-400 ${
+                        isDark
+                            ? 'bg-stone-800 text-stone-100 placeholder:text-stone-500'
+                            : 'bg-slate-50 text-slate-700 placeholder:text-slate-400'
+                    }`}
+                />
+
+                <input
+                    type="text"
+                    placeholder="Customer ID (optional)"
+                    value={customerId}
+                    onChange={(e) => setCustomerId(e.target.value)}
+                    className={`w-full p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-emerald-500 ${
+                        isDark
+                            ? 'bg-stone-800 text-stone-100 placeholder:text-stone-500'
+                            : 'bg-slate-50 text-slate-700 placeholder:text-slate-400'
                     }`}
                 />
 
@@ -105,6 +142,18 @@ export default function QuickSale() {
                         <option key={r} value={r}>{r}</option>
                     ))}
                 </select>
+
+                <input
+                    type="date"
+                    value={transactionDate}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setTransactionDate(e.target.value)}
+                    className={`w-full p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-emerald-500 ${
+                        isDark
+                            ? 'bg-stone-800 text-stone-100'
+                            : 'bg-slate-50 text-slate-700'
+                    }`}
+                />
 
                 <button
                     disabled={loading || !product || !region}
