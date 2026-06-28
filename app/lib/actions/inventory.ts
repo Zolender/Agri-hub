@@ -85,7 +85,7 @@ export async function recordSaleAction(
                 data: { quantity: { decrement: quantitySold } },
             });
 
-            await tx.transaction.create({
+            const transaction = await tx.transaction.create({
                 data: {
                     productId,
                     movementType: "Sale",
@@ -96,6 +96,17 @@ export async function recordSaleAction(
                     region,
                     orderId: `SALE-${Date.now()}`,
                     transactionDate,
+                },
+            });
+
+            const totalDemand = quantitySold + lostSaleQty;
+            await tx.transactionMetrics.create({
+                data: {
+                    transactionId: transaction.id,
+                    fulfillmentRatio: totalDemand > 0 ? (quantitySold / totalDemand) * 100 : 100,
+                    stockPressure: product.reorderPointUnits > 0
+                        ? updated.quantity / product.reorderPointUnits
+                        : null,
                 },
             });
 
@@ -201,6 +212,16 @@ export async function recordPurchaseAction(
                     },
                 });
             }
+
+            await tx.transactionMetrics.create({
+                data: {
+                    transactionId: transaction.id,
+                    fulfillmentRatio: 100,
+                    stockPressure: product.reorderPointUnits > 0
+                        ? updated.quantity / product.reorderPointUnits
+                        : null,
+                },
+            });
         });
 
         await logAction({
