@@ -34,13 +34,14 @@ const REQUIRED_CSV_HEADERS = [
     'reorder_point_units', 'lead_time_buffer_days', 'movement_type',
     'remaining_stock_units', 'order_id', 'region', 'transaction_date', 'landed_cost_rwf',
 ];
+// quantity_fulfilled_units and product_name are optional — not in required list
 
 function downloadTemplateCsv() {
     const headers = [
         // Required core fields
-        'product_id', 'category_id', 'unit_of_measure', 'unit_cost_rwf', 'selling_price_rwf',
+        'product_id', 'product_name', 'category_id', 'unit_of_measure', 'unit_cost_rwf', 'selling_price_rwf',
         'reorder_point_units', 'lead_time_buffer_days',
-        'movement_type', 'quantity_ordered_units', 'remaining_stock_units',
+        'movement_type', 'quantity_ordered_units', 'quantity_fulfilled_units', 'remaining_stock_units',
         'order_id', 'region', 'transaction_date', 'landed_cost_rwf',
         // Optional tracking fields
         'lost_sale_qty_units', 'customer_id', 'po_id', 'supplier_id',
@@ -52,20 +53,20 @@ function downloadTemplateCsv() {
 
     // Example row 1 — a Purchase with shipment and FX data
     const purchaseRow = [
-        'FERT-DAP-50KG', 'Fertilizers', 'bag', '38000', '45000',
+        'FERT-DAP-50KG', 'DAP Fertilizer 50kg', 'Fertilizers', 'bag', '38000', '45000',
         '50', '14',
-        'Purchase', '120', '210',
+        'Purchase', '120', '120', '210',
         'PO-2026-001', 'Kigali', '2026-03-27', '41000',
         '0', '', 'PO-2026-001', 'ETG-Rwanda',
         'Sea', 'Dar es Salaam', 'Tanzania', '2026-04-10', '2026-03-20',
         '1285', '1450',
     ];
 
-    // Example row 2 — a Sale with a lost sale recorded
+    // Example row 2 — a Sale with partial fulfillment (lost sale recorded)
     const saleRow = [
-        'FERT-DAP-50KG', 'Fertilizers', 'bag', '38000', '45000',
+        'FERT-DAP-50KG', 'DAP Fertilizer 50kg', 'Fertilizers', 'bag', '38000', '45000',
         '50', '14',
-        'Sale', '10', '200',
+        'Sale', '12', '10', '200',
         'ORD-2026-002', 'Musanze', '2026-04-01', '41000',
         '2', 'CUST-001', '', '',
         '', '', '', '', '',

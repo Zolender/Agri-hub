@@ -167,7 +167,7 @@ export default function QuickAdd() {
                             : 'bg-emerald-50 border-emerald-100'
                     }`}>
                         <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide">
-                            {product.categoryId}
+                            {product.name ?? product.categoryId}
                         </p>
                         <div className="flex justify-between items-center mt-1.5 gap-4 flex-wrap">
                             <span className={isDark ? 'text-stone-300' : 'text-slate-600'}>

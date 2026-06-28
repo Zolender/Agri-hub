@@ -14,6 +14,7 @@ export async function getProductPreview(id: string) {
         where: { id },
         select: {
             id: true,
+            name: true,
             categoryId: true,
             quantity: true,
             sellingPriceRwf: true,

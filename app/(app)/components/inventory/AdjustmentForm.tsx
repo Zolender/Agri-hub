@@ -106,7 +106,7 @@ export default function AdjustmentForm() {
                     <div className={`p-3 rounded-xl border text-sm animate-in fade-in slide-in-from-top-2 ${
                         isDark ? 'bg-emerald-950 border-emerald-800' : 'bg-emerald-50 border-emerald-100'
                     }`}>
-                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide">{product.categoryId}</p>
+                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide">{product.name ?? product.categoryId}</p>
                         <div className="flex justify-between items-center mt-1.5 gap-4 flex-wrap">
                             <span className={isDark ? 'text-stone-300' : 'text-slate-600'}>
                                 Current stock: <span className="font-semibold">{product.quantity.toLocaleString()} {product.unitOfMeasure}</span>

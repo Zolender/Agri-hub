@@ -9,6 +9,7 @@ datasource db {
 
 model Product {
   id                 String        @id
+  name               String?
   categoryId         String
   unitOfMeasure      String
   unitCostRwf        Float
@@ -24,11 +25,12 @@ model Product {
 
 model Transaction {
   id                   String              @id @default(cuid())
-  orderId              String
-  productId            String
-  movementType         MovementType
-  quantityOrderedUnits Int
-  remainingStockUnits  Int
+  orderId                  String
+  productId                String
+  movementType             MovementType
+  quantityOrderedUnits     Int
+  quantityFulfilledUnits   Int?
+  remainingStockUnits      Int
   customerId           String?
   supplierId           String?
   poId                 String?

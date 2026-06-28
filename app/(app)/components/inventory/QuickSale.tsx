@@ -78,7 +78,7 @@ export default function QuickSale() {
                             ? 'bg-emerald-950 border-emerald-800'
                             : 'bg-emerald-50 border-emerald-100'
                     }`}>
-                        <p className="text-xs font-bold text-emerald-600 uppercase">{product.categoryId}</p>
+                        <p className="text-xs font-bold text-emerald-600 uppercase">{product.name ?? product.categoryId}</p>
                         <div className="flex justify-between items-center mt-1">
                             <span className={`text-sm ${isDark ? 'text-stone-300' : 'text-slate-600'}`}>
                                 Stock: {product.quantity}

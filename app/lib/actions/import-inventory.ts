@@ -38,6 +38,7 @@ export async function importInventoryAction(data: any[]){
                         const product = await tx.product.upsert({
                             where: {id: row.product_id},
                             update: {
+                                ...(row.product_name ? { name: row.product_name } : {}),
                                 quantity: row.remaining_stock_units,
                                 unitCostRwf: row.unit_cost_rwf,
                                 sellingPriceRwf: row.selling_price_rwf,
@@ -45,6 +46,7 @@ export async function importInventoryAction(data: any[]){
                             },
                             create:{
                                 id: row.product_id,
+                                name: row.product_name ?? null,
                                 categoryId: row.category_id,
                                 unitOfMeasure: row.unit_of_measure,
                                 unitCostRwf: row.unit_cost_rwf,
@@ -68,6 +70,7 @@ export async function importInventoryAction(data: any[]){
                                 orderId: row.order_id,
                                 movementType: row.movement_type,
                                 quantityOrderedUnits: row.quantity_ordered_units,
+                                quantityFulfilledUnits: row.quantity_fulfilled_units ?? null,
                                 remainingStockUnits: row.remaining_stock_units,
                                 customerId: row.customer_id,
                                 supplierId: row.supplier_id,

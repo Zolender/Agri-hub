@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const TransactionCsvSchema = z.object({
     product_id: z.string().min(1),
+    product_name: z.string().optional(),
     category_id: z.string().min(1),
     unit_of_measure: z.string(),
     unit_cost_rwf: z.coerce.number(),
@@ -12,6 +13,7 @@ export const TransactionCsvSchema = z.object({
 
     movement_type: z.enum(['Sale', 'Adjustment', 'Purchase']),
     quantity_ordered_units: z.coerce.number().optional().default(0),
+    quantity_fulfilled_units: z.coerce.number().optional(),
     remaining_stock_units: z.coerce.number(),
     order_id: z.string(),
     customer_id: z.string().optional(),
